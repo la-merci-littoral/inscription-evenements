@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
-import { env } from 'process'
 
 const router = createRouter({
-  history: createWebHistory(process.env.SITE_HOST),
+  // history: createWebHistory(process.env.SITE_HOST),
+  history: createWebHistory(),
   routes: [
     {
       path: '/',
