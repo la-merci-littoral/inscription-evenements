@@ -2,6 +2,7 @@
 
 import '@fontsource/krona-one';
 import '@fontsource/orienta';
+import { useUserStore } from '@/stores/user';
 
 import { onMounted } from 'vue';
 
@@ -51,6 +52,8 @@ onMounted(() => {
   });
 });
 
+var user = useUserStore();
+
 </script>
 
 <template>
@@ -60,42 +63,42 @@ onMounted(() => {
 
       <label for="name">
         Prénom
-        <input type="text" id="name" name="name" required>
+        <input type="text" id="name" name="name" required v-model="user.name">
       </label>
 
       <label for="surname">
         Nom
-        <input type="text" id="surname" name="surname" required>
+        <input type="text" id="surname" name="surname" required v-model="user.surname">
       </label>
 
       <label for="email">
         Email 
-        <input type="email" id="email" name="email" required>
+        <input type="email" id="email" name="email" required v-model="user.email">
       </label>
 
       <label for="phone">
         Téléphone 
-        <input type="tel" id="phone" name="phone" required>
+        <input type="tel" id="phone" name="phone" required v-model="user.phone">
       </label>
 
       <label for="address">
         Adresse 
-        <input type="text" id="address" name="address" required>
+        <input type="text" id="address" name="address" required v-model="user.address">
       </label>
 
       <label for="zip">
         Code postal 
-        <input type="text" id="zip" name="zip" required>
+        <input type="text" id="zip" name="zip" required v-model="user.zip">
       </label>
 
       <label for="city">
         Ville 
-        <input type="text" id="city" name="city" required>
+        <input type="text" id="city" name="city" required v-model="user.city">
       </label>
 
       <label for="country">
         Pays 
-        <input type="text" id="country" name="country" required>
+        <input type="text" id="country" name="country" required v-model="user.country">
       </label>
 
     </div>
@@ -105,10 +108,11 @@ onMounted(() => {
 
 <style>
   #info-wrapper {
-    padding: 20px;
+    padding: 20px 40px;
     border-radius: 25px;
     color: white;
     background-color: #2c7ba8;
+    border: 2px solid #1d338f;
 
     display: flex;
     flex-direction: column;
@@ -126,7 +130,7 @@ onMounted(() => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr 1fr;
-    column-gap: 5vw;
+    column-gap: 4vw;
     row-gap: 20px;
     grid-auto-flow: column;
     font-family: 'Orienta', sans-serif;

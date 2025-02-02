@@ -24,19 +24,22 @@ import Logo from '@/assets/placeholder_rdle.png'
   main {
     height: 100%;
     width: 100%;
-    background-color: #68c2ff;
+    background-color: #82cdff;
 
     display: grid;
-    grid-template-columns: 0.8fr 1fr;
+    grid-template-columns: 0.4fr 0.7fr;
     justify-content: center;
     align-items: center;
   }
 
   #header-wrapper {
     width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #31749e;
+    border-right: 2px solid #1d338f;
   }
 
   header {
@@ -45,11 +48,9 @@ import Logo from '@/assets/placeholder_rdle.png'
     align-items: center;
     justify-content: space-evenly;
     border-radius: 25px;
-    padding: 3rem;
-    background-color: #2c7ba8;
+    background-color: #31749e;
     color: #fff;
-    max-width: 60%;
-    box-shadow: 8px 8px 16px 0px rgb(0 55 91 / 75%);
+    max-width: 90%;
   }
 
   header img {

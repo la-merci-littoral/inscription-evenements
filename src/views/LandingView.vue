@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import '@fontsource/krona-one';
+import '@fontsource/lexend';
 import { ChevronRight } from 'lucide-vue-next';
 </script>
 
@@ -44,6 +45,7 @@ import { ChevronRight } from 'lucide-vue-next';
   animation: pulse 1s ease-in-out infinite;
   transition: background-color 0.2s;
   text-decoration: none;
+  font-family: 'Lexend', sans-serif;
 }
 
 #hero-landing button:hover {
