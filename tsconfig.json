@@ -5,7 +5,10 @@
       "path": "./tsconfig.node.json"
     },
     {
-      "path": "./tsconfig.app.json"
+      "path": "./frontend/tsconfig.json"
+    },
+    {
+      "path": "./backend/tsconfig.json"
     }
   ]
 }

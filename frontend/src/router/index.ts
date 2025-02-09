@@ -21,7 +21,7 @@ const router = createRouter({
       component: () => import('../views/PaymentView.vue'),
     },
     {
-      path: '/terminé',
+      path: '/final',
       name: 'final',
       component: () => import('../views/FinalView.vue'),
     },

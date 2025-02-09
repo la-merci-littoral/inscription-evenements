@@ -50,6 +50,10 @@ onMounted(() => {
       validateForm();
     });
   });
+  inputs.forEach(input => {
+    input.dispatchEvent(new Event('input'));
+  });
+  validateForm();
 });
 
 var user = useUserStore();
@@ -72,37 +76,37 @@ var user = useUserStore();
       </label>
 
       <label for="email">
-        Email 
+        Email
         <input type="email" id="email" name="email" required v-model="user.email">
       </label>
 
       <label for="phone">
-        Téléphone 
+        Téléphone
         <input type="tel" id="phone" name="phone" required v-model="user.phone">
       </label>
 
       <label for="address">
-        Adresse 
+        Adresse
         <input type="text" id="address" name="address" required v-model="user.address">
       </label>
 
       <label for="zip">
-        Code postal 
+        Code postal
         <input type="text" id="zip" name="zip" required v-model="user.zip">
       </label>
 
       <label for="city">
-        Ville 
+        Ville
         <input type="text" id="city" name="city" required v-model="user.city">
       </label>
 
       <label for="country">
-        Pays 
+        Pays
         <input type="text" id="country" name="country" required v-model="user.country">
       </label>
 
     </div>
-    <button type="submit">Valider</button>
+    <RouterLink to="/paiement"><button type="submit">Valider</button></RouterLink>
   </div>
 </template>
 

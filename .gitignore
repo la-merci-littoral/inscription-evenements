@@ -30,4 +30,10 @@ coverage
 *.tsbuildinfo
 
 
-.env
+.env*
+
+db/
+mongodb.cfg
+log/
+
+credentials.md
