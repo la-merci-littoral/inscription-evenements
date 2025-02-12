@@ -1,10 +1,10 @@
-import mongoose, { mongo, Schema } from "mongoose";
+import mongoose, { mongo, Schema, Model } from "mongoose";
 import IPerson from "../types/person";
 
-const PersonSchema: Schema = new Schema<IPerson>({
+const PersonSchema: Schema<IPerson> = new Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true },
     surname: { type: String, required: true },
+    email: { type: String, required: true },
     phone: { type: String, required: true },
     address: { type: String, required: true },
     zip: { type: String, required: true },
@@ -20,3 +20,7 @@ const PersonSchema: Schema = new Schema<IPerson>({
         }
     }
 });
+
+const AdhesionModel: Model<IPerson> = mongoose.model("adhesion", PersonSchema, "adhesion");
+
+export default AdhesionModel;

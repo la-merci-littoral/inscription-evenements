@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 
-interface UserState {
+interface PersonState {
   name: string;
   surname: string;
   email: string;
@@ -10,10 +10,9 @@ interface UserState {
   zip: string;
   city: string;
   country: string;
-  remoteID: string;
 }
 
-export const useUserStore = defineStore<'user', UserState>('user', {
+export const usePersonStore = defineStore<'person', PersonState>('person', {
   state: () => ({
     name: '',
     surname: '',
@@ -23,7 +22,6 @@ export const useUserStore = defineStore<'user', UserState>('user', {
     zip: '',
     city: '',
     country: '',
-    remoteID: ''
   }),
   getters: {
     fullName() {

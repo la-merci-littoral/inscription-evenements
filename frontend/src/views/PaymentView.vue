@@ -8,6 +8,8 @@ import type {
     Stripe,
 } from "@stripe/stripe-js";
 
+import { usePersonStore } from "@/stores/person";
+
 import { ref, onBeforeMount } from "vue";
 
 const stripePk = import.meta.env.STRIPE_PK;
@@ -28,8 +30,12 @@ const paymentComponent = ref()
 onBeforeMount(() => {
     
     loadStripe(stripePk).then(() => {
-        fetch("/api/payment/intent", {
-            method: "GET",
+        fetch("/api/person", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(usePersonStore().$state),
         })
             .then((response) => {
                 return response.json();
@@ -53,6 +59,7 @@ async function handlePaymentSubmit() {
             confirmParams: {
                 return_url: import.meta.env.BASE_URL + "/final",
             },
+
         })
 
         if (error) {

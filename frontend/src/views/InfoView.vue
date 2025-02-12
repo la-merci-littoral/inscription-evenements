@@ -2,7 +2,7 @@
 
 import '@fontsource/krona-one';
 import '@fontsource/orienta';
-import { useUserStore } from '@/stores/user';
+import { usePersonStore } from '@/stores/person';
 
 import { onMounted } from 'vue';
 
@@ -56,7 +56,7 @@ onMounted(() => {
   validateForm();
 });
 
-var user = useUserStore();
+var person = usePersonStore();
 
 </script>
 
@@ -67,42 +67,42 @@ var user = useUserStore();
 
       <label for="name">
         Prénom
-        <input type="text" id="name" name="name" required v-model="user.name">
+        <input type="text" id="name" name="name" required v-model="person.name">
       </label>
 
       <label for="surname">
         Nom
-        <input type="text" id="surname" name="surname" required v-model="user.surname">
+        <input type="text" id="surname" name="surname" required v-model="person.surname">
       </label>
 
       <label for="email">
         Email
-        <input type="email" id="email" name="email" required v-model="user.email">
+        <input type="email" id="email" name="email" required v-model="person.email">
       </label>
 
       <label for="phone">
         Téléphone
-        <input type="tel" id="phone" name="phone" required v-model="user.phone">
+        <input type="tel" id="phone" name="phone" required v-model="person.phone">
       </label>
 
       <label for="address">
         Adresse
-        <input type="text" id="address" name="address" required v-model="user.address">
+        <input type="text" id="address" name="address" required v-model="person.address">
       </label>
 
       <label for="zip">
         Code postal
-        <input type="text" id="zip" name="zip" required v-model="user.zip">
+        <input type="text" id="zip" name="zip" required v-model="person.zip">
       </label>
 
       <label for="city">
         Ville
-        <input type="text" id="city" name="city" required v-model="user.city">
+        <input type="text" id="city" name="city" required v-model="person.city">
       </label>
 
       <label for="country">
         Pays
-        <input type="text" id="country" name="country" required v-model="user.country">
+        <input type="text" id="country" name="country" required v-model="person.country">
       </label>
 
     </div>
