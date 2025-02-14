@@ -8,11 +8,6 @@ import dotenv from 'dotenv'
 var serverConfig = {}
 if (process.env.NODE_ENV === 'development') {
   serverConfig = {
-    port: 5173
-  }
-  dotenv.config({path: '../.env.development'})
-} else if (process.env.NODE_ENV === 'production') {
-  serverConfig = {
     port: 5173,
     proxy: {
       '/api': {
@@ -20,6 +15,11 @@ if (process.env.NODE_ENV === 'development') {
         changeOrigin: true,
       }
     }
+  }
+  dotenv.config({path: '../.env.development'})
+} else if (process.env.NODE_ENV === 'production') {
+  serverConfig = {
+    port: 5173
   }
   dotenv.config({path: '../.env.production'})
 }

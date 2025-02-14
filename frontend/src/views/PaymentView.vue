@@ -42,7 +42,7 @@ onBeforeMount(() => {
             })
             .then((data) => {
                 clientSecret.value = data.clientSecret;
-                stripeLoaded.value = true;
+                (elementsComponent.value as StripeElements).getElement("payment")?.on
             });
     });
 });
@@ -74,8 +74,9 @@ async function handlePaymentSubmit() {
 
 <template>
     <div id="payment-wrapper">
+        <h2>Paiement</h2>
         <form v-if="stripeLoaded" @submit.prevent="handlePaymentSubmit">
-            <StripeElementsWrapper 
+            <StripeElementsWrapper
                 :stripe-key="stripePk" 
                 :instance-options="{}"
                 :elements-options="stripeOptions" 
@@ -85,9 +86,31 @@ async function handlePaymentSubmit() {
             </StripeElementsWrapper>
             <button type="submit">Submit</button>
         </form>
+        <div v-else>
+            hello there
+        </div>
     </div>
 </template>
 
 <style>
+
+#payment-wrapper {
+    padding: 20px 40px;
+    border-radius: 25px;
+    color: white;
+    background-color: #2c7ba8;
+    border: 2px solid #1d338f;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+h2 {
+    font-family: 'Krona One', sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+}
 
 </style>

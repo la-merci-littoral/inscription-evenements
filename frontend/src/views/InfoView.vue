@@ -106,7 +106,7 @@ var person = usePersonStore();
       </label>
 
     </div>
-    <RouterLink to="/paiement"><button type="submit">Valider</button></RouterLink>
+    <RouterLink to="/paiement"><button type="submit">Payer les 10€</button></RouterLink>
   </div>
 </template>
 
