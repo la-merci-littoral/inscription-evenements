@@ -1,0 +1,89 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production-ionos
+    steps:
+    
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18 
+
+      - name: Install node modules
+        run: npm install
+        
+      - name: Create .env.production file from GitHub Secrets
+        run: |
+          echo "AMOUNT=${{ vars.AMOUNT }}" >> .env.production
+          echo "STRIPE_PK=${{ secrets.STRIPE_PK }}" >> .env.production
+          echo "STRIPE_SK=${{ secrets.STRIPE_SK }}" >> .env.production
+          echo "STRIPE_WBH_SECRET=${{ secrets.STRIPE_WBH_SECRET }}" >> .env.production
+          echo "BASE_URL=${{ vars.BASE_URL }}" >> .env.production
+          echo "MONGO_CONN_STR=${{ secrets.MONGO_CONN_STR }}" >> .env.production
+
+      - name: Build
+        run: NODE_ENV=production npm run build
+
+      - name: Transfer Backend to VPS
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          target: /web/adhesion-adal/
+          source: "backend/*,.env.production"
+          overwrite: true
+
+      - name: Transfer Frontend to VPS
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          target: /web/adhesion-adal/
+          source: frontend/dist/*
+          overwrite: true
+          strip_components: 1
+
+      - name: Reload Backend on VPS
+        uses: appleboy/ssh-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            cd /web/adhesion-adal/backend/
+            cp ../.env.production .
+            npm install --omit=dev
+            if pm2 describe adhesion-backend > /dev/null; then
+              NODE_ENV=production pm2 restart adhesion-backend --update-env
+            else
+              NODE_ENV=production pm2 start /web/adhesion-adal/backend/dist/main.js --name adhesion-backend
+            fi
+            pm2 save
+      
+      - name: Reload Frontend on VPS
+        uses: appleboy/ssh-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          script: |
+            rm -rf /web/adhesion-adal/frontend
+            mv /web/adhesion-adal/dist /web/adhesion-adal/frontend
+            sudo chown -R www-data:www-data /web/adhesion-adal/frontend
+            sudo chmod -R 755 /web/adhesion-adal/frontend
