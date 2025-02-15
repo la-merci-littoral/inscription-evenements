@@ -21,9 +21,14 @@ const router = createRouter({
       component: () => import('../views/PaymentView.vue'),
     },
     {
-      path: '/final',
-      name: 'final',
-      component: () => import('../views/FinalView.vue'),
+      path: '/validation',
+      name: 'validation',
+      component: () => import('../views/ValidationView.vue'),
+    },
+    {
+      path: '/confirmation',
+      name: 'confirmation',
+      component: () => import('../views/ConfirmationView.vue'),
     },
   ],
 })

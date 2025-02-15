@@ -26,15 +26,42 @@ const stripe = new Stripe(process.env.STRIPE_SK!);
 
 mongoose.connect(process.env.MONGO_CONN_STR!)
 
-
-
-router.put("/person", async (req, res) => {
-    const userData = req.body;
-
+async function generatePaymentIntent() {
     const paymentIntent = await stripe.paymentIntents.create({
         amount: parseInt(process.env.AMOUNT!),
         currency: 'eur'
     });
+    return [paymentIntent.id, paymentIntent.client_secret!];
+}
+
+router.put("/person", async (req, res) => {
+    const userData = req.body;
+
+    const potentialFind = await AdhesionModel.findOne({
+        $and: [
+            { "email": userData.email },
+            { "adhesion.payment.hasPaid": true }
+        ]
+    })
+    if (potentialFind !== null) {
+        res.status(409).send("Already paid");
+        return;
+    }
+    
+    var paymentIntentSecret = userData.pi_secret
+    var paymentIntentId = "";
+
+    if (paymentIntentSecret === "") {
+        console.log("Generating new payment intent");
+        [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent();
+    } else {
+        paymentIntentId = RegExp(/(.*)_secret_(.*)/gm).exec(paymentIntentSecret as string)![1]
+        await stripe.paymentIntents.retrieve(paymentIntentId).then(async (paymentIntentObject) => {
+            if (paymentIntentObject.status === "succeeded") {
+                [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent();
+            }
+        })
+    }
 
     userData.adhesion = {
         date: new Date(),
@@ -42,15 +69,22 @@ router.put("/person", async (req, res) => {
             hasPaid: false,
             date: new Date(0),
             method: "none",
-            intentId: paymentIntent.id
+            intentId: paymentIntentId
         }
     }
-    await AdhesionModel.updateOne({email: userData.email}, userData, {upsert: true})
+    delete userData.pi_secret;
+
+    await AdhesionModel.updateOne({
+        $or: [
+            { "email": userData.email },
+            { "adhesion.payment.intentId": paymentIntentId }
+        ]
+    }, userData, {upsert: true})
+
     res.send({
-        clientSecret: paymentIntent.client_secret
+        clientSecret: paymentIntentSecret,
     })
 
-    
 });
 
 router.post("/payment/webhook", express.raw({type: 'application/json'}),async (req, res) => {
@@ -67,8 +101,23 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
         await AdhesionModel.findOneAndUpdate({"adhesion.payment.intentId": event.data.object.id}, {"adhesion.payment.hasPaid" : true, "adhesion.payment.date": new Date(), "adhesion.payment.method": event.data.object.payment_method});
+        console.log(event.data.object.id + " has been paid");
     }
     res.json({received: true});
+});
+
+router.get("/validate", async (req, res) => {
+    const paymentIntent = req.query.pi;
+    try {
+        const doc = await AdhesionModel.findOne({"adhesion.payment.intentId": paymentIntent});
+        if (!doc) {
+            res.status(404).send("Not found");
+        } else {
+            res.status(200).send("OK");
+        }
+    } catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 app.listen(5174, () => { console.log("Backend is running on port 5174") });

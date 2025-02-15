@@ -106,11 +106,11 @@ var person = usePersonStore();
       </label>
 
     </div>
-    <RouterLink to="/paiement"><button type="submit">Payer les 10€</button></RouterLink>
+    <RouterLink to="/paiement"><button type="submit">Continuer</button></RouterLink>
   </div>
 </template>
 
-<style>
+<style scoped>
   #info-wrapper {
     padding: 20px 40px;
     border-radius: 25px;

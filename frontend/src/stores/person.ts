@@ -10,9 +10,11 @@ interface PersonState {
   zip: string;
   city: string;
   country: string;
+  pi_secret: string;
+  existsSince: Date;
 }
 
-export const usePersonStore = defineStore<'person', PersonState>('person', {
+export const usePersonStore = defineStore('person', {
   state: () => ({
     name: '',
     surname: '',
@@ -22,11 +24,11 @@ export const usePersonStore = defineStore<'person', PersonState>('person', {
     zip: '',
     city: '',
     country: '',
+    pi_secret: '',
+    existsSince: new Date(0),
   }),
   getters: {
-    fullName() {
-      return `${this.name} ${this.surname}`
-    }
+    fullName: (state) => `${state.name} ${state.surname}`
   },
   actions: {
   },
