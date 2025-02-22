@@ -3,10 +3,12 @@ import { RouterLink, RouterView } from 'vue-router'
 import '@fontsource/lexend';
 // import Logo from '@/assets/logo.svg?url'
 import Logo from '@/assets/placeholder_rdle.png'
+import isMobile from 'mobile-device-detect'
+import MobileView from './views/MobileView.vue';
 </script>
 
 <template>
-  <main>
+  <main v-if="!isMobile">
     <div id="header-wrapper">
       <header>
         <img :src="Logo" alt="Logo de l'association">
@@ -17,6 +19,7 @@ import Logo from '@/assets/placeholder_rdle.png'
       <RouterView />
     </div>
   </main>
+  <MobileView v-else />
 </template>
 
 <style scoped>

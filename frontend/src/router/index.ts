@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
+import MobileView from '@/views/MobileView.vue'
 
 const router = createRouter({
   // history: createWebHistory(process.env.SITE_HOST),

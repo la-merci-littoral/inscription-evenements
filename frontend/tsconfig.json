@@ -9,5 +9,6 @@
       "@/*": ["./src/*"]
     },
     "target": "ES6",
+    "module": "ESNext"
   }
 }
