@@ -1,7 +1,9 @@
 import mongoose, { mongo, Schema, Model } from "mongoose";
-import IPerson from "../types/person";
+import IMember from "../types/member";
+import { customAlphabet } from "nanoid";
 
-const PersonSchema: Schema<IPerson> = new Schema({
+const MemberSchema: Schema<IMember> = new Schema({
+    member_id: { type: String, required: true, default: customAlphabet("1234567890", 6)() },
     name: { type: String, required: true },
     surname: { type: String, required: true },
     email: { type: String, required: true },
@@ -21,6 +23,6 @@ const PersonSchema: Schema<IPerson> = new Schema({
     }
 });
 
-const AdhesionModel: Model<IPerson> = mongoose.model("adhesion", PersonSchema, "adhesion");
+const AdhesionModel: Model<IMember> = mongoose.model("adhesion", MemberSchema, "adhesion");
 
 export default AdhesionModel;

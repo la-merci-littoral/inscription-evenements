@@ -1,8 +1,8 @@
-import mongoose, { Schema } from "mongoose";
-import Stripe from 'stripe'
+import { Document } from "mongoose";
 
-interface IPerson extends Document {
-    _id: mongoose.Schema.Types.ObjectId;
+interface IMember extends Document {
+    _id: string;
+    member_id: string;
     name: string;
     surname: string;
     email: string;
@@ -23,4 +23,4 @@ interface IPerson extends Document {
     }
 }
 
-export default IPerson
+export default IMember
