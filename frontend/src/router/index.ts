@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
-import MobileView from '@/views/MobileView.vue'
 
 const router = createRouter({
   // history: createWebHistory(process.env.SITE_HOST),
@@ -10,6 +9,16 @@ const router = createRouter({
       path: '/',
       name: 'landing',
       component: LandingView,
+    },
+    {
+      path: '/choix',
+      name: 'choice',
+      component: () => import('../views/ChoiceView.vue')
+    },
+    {
+      path: '/adherent',
+      name: 'member',
+      component: () => import('../views/MemberView.vue')
     },
     {
       path: '/mes-informations',

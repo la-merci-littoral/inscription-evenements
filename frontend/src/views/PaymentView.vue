@@ -49,7 +49,7 @@ var userExists = ref(false)
 onBeforeMount(() => {
     
     loadStripe(stripePk).then(() => {
-        fetch("/api/person", {
+        fetch("/api/booking", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",

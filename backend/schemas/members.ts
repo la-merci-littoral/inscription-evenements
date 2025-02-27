@@ -23,6 +23,6 @@ const MemberSchema: Schema<IMember> = new Schema({
     }
 });
 
-const AdhesionModel: Model<IMember> = mongoose.model("adhesion", MemberSchema, "adhesion");
+const MemberModel: Model<IMember> = mongoose.model("member", MemberSchema, "adhesion");
 
-export default AdhesionModel;
+export default MemberModel;

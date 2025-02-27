@@ -19,5 +19,5 @@ const BookingSchema: Schema<IBooking> = new Schema({
     }
 })
 
-const InscriptionModel = model<IBooking>("inscription", BookingSchema, "inscription");
-export default InscriptionModel;
+const BookingModel = model<IBooking>("booking", BookingSchema, "inscription");
+export default BookingModel;

@@ -4,8 +4,12 @@ interface RawRequest extends Request {
     rawBody?: string;
 }
 import Stripe from 'stripe';
+
+
 import mongoose from 'mongoose';
-import AdhesionModel from './schemas/adhesion';
+import BookingModel from './schemas/bookings';
+import EventModel from './schemas/events';
+import MemberModel from './schemas/members';
 
 
 const envPath = process.env.NODE_ENV === 'production' ? '../.env.production' : '../.env.development';
@@ -34,13 +38,38 @@ async function generatePaymentIntent() {
     return [paymentIntent.id, paymentIntent.client_secret!];
 }
 
-router.put("/person", async (req, res) => {
-    const userData = req.body;
+router.get("/events", async (req,res) => {
+    // const dbEvents = await EventModel.find({date_start: {$gte: new Date()}}).sort({date_start: 1});
+    const dbEvents = await EventModel.find({}).sort({ date_start: 1 });
+    const events = dbEvents.map((dbEvent) => {
+        return {
+            ...dbEvent.toObject()
+        }
+    })
+    res.send(events)
+})
 
-    const potentialFind = await AdhesionModel.findOne({
+router.get("/member", async (req, res) => {
+    const member = await MemberModel.findOne({"member_id": req.query.member_id})
+    if (member === null) {
+        res.status(404).send("Not found");
+    } else {
+        res.send({
+            name: member.name,
+            surname: member.surname,
+            email: member.email,
+            phone: member.phone
+        });
+    }
+})
+
+router.put("/booking", async (req, res) => {
+    var userData = req.body;
+
+    const potentialFind = await BookingModel.findOne({
         $and: [
             { "email": userData.email },
-            { "adhesion.payment.hasPaid": true }
+            { "payment.hasPaid": true }
         ]
     })
     if (potentialFind !== null) {
@@ -63,7 +92,8 @@ router.put("/person", async (req, res) => {
         })
     }
 
-    userData.adhesion = {
+    userData = {
+        ...userData,
         date: new Date(),
         payment: {
             hasPaid: false,
@@ -74,10 +104,10 @@ router.put("/person", async (req, res) => {
     }
     delete userData.pi_secret;
 
-    await AdhesionModel.updateOne({
+    await BookingModel.updateOne({
         $or: [
             { "email": userData.email },
-            { "adhesion.payment.intentId": paymentIntentId }
+            { "payment.intentId": paymentIntentId }
         ]
     }, userData, {upsert: true})
 
@@ -100,7 +130,7 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     }
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
-        await AdhesionModel.findOneAndUpdate({"adhesion.payment.intentId": event.data.object.id}, {"adhesion.payment.hasPaid" : true, "adhesion.payment.date": new Date(), "adhesion.payment.method": event.data.object.payment_method});
+        await BookingModel.findOneAndUpdate({"payment.intentId": event.data.object.id}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": event.data.object.payment_method});
         console.log(event.data.object.id + " has been paid");
     }
     res.json({received: true});
@@ -109,7 +139,7 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
 router.get("/validate", async (req, res) => {
     const paymentIntent = req.query.pi;
     try {
-        const doc = await AdhesionModel.findOne({"adhesion.payment.intentId": paymentIntent});
+        const doc = await BookingModel.findOne({"payment.intentId": paymentIntent});
         if (!doc) {
             res.status(404).send("Not found");
         } else {

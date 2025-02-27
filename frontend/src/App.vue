@@ -12,7 +12,7 @@ import MobileView from './views/MobileView.vue';
     <div id="header-wrapper">
       <header>
         <img :src="Logo" alt="Logo de l'association">
-        <h1>Association des Amis du Littoral</h1>
+        <h1>Lycée La Merci Littoral</h1>
       </header>
     </div>
     <div id="main-wrapper">

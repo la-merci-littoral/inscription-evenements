@@ -1,31 +1,14 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-
-interface PersonState {
-  name: string;
-  surname: string;
-  email: string;
-  phone: string;
-  address: string;
-  zip: string;
-  city: string;
-  country: string;
-  pi_secret: string;
-  existsSince: Date;
-}
+import type Person from '@/types/person'
 
 export const usePersonStore = defineStore('person', {
-  state: () => ({
+  state: () => (<Person>{
     name: '',
     surname: '',
     email: '',
     phone: '',
-    address: '',
-    zip: '',
-    city: '',
-    country: '',
     pi_secret: '',
-    existsSince: new Date(0),
   }),
   getters: {
     fullName: (state) => `${state.name} ${state.surname}`
