@@ -24,7 +24,7 @@ router.use(express.json({
         }
     }
 }));
-app.use('/api', router);
+app.use('/', router);
 
 const stripe = new Stripe(process.env.STRIPE_SK!);
 
