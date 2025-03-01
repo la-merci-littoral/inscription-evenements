@@ -49,8 +49,8 @@ router.get("/events", async (req,res) => {
     res.send(events)
 })
 
-router.get("/member", async (req, res) => {
-    const member = await MemberModel.findOne({"member_id": req.query.member_id})
+router.get("/member/:member_id", async (req, res) => {
+    const member = await MemberModel.findOne({"member_id": req.params.member_id})
     if (member === null) {
         res.status(404).send("Not found");
     } else {
@@ -150,4 +150,4 @@ router.get("/validate", async (req, res) => {
     }
 });
 
-app.listen(5174, () => { console.log("Backend is running on port 5174") });
+app.listen(5175, () => { console.log("Backend is running on port 5175") });

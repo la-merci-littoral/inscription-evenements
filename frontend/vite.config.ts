@@ -11,8 +11,9 @@ if (process.env.NODE_ENV === 'development') {
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5174',
+        target: 'http://localhost:5175/',
         changeOrigin: true,
+        rewrite: (path: string) => path.replace(/^\/api/, '')
       }
     }
   }

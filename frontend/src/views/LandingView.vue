@@ -8,7 +8,7 @@ import { ChevronRight } from 'lucide-vue-next';
 <template>
   <div id="hero-landing">
     <div id="big-landing-text">Evènements</div>
-    <RouterLink to="/mes-informations">
+    <RouterLink to="/choix">
       <button>
         Je m'inscris !
         <ChevronRight />

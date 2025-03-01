@@ -4,10 +4,11 @@ interface Event {
     date_start: Date;
     date_end: Date;
     location: string;
-    prices: {
-        member: number;
-        non_member: number;
-    }
+    price_categories: {
+        type: "member" | "minor" | "default";
+        price: number;
+        display: string;
+    }[];
 }
 
 export default Event;
