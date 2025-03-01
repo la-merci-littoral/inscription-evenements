@@ -15,7 +15,8 @@ onMounted(() => {
                 'Content-Type': 'application/json',
             },
         })
-            .then((response) => {
+            .then(async (response) => {
+                localStorage.setItem('ticket_info', JSON.stringify(await response.json() as { jwt: string, booking_id: string }));
                 setTimeout(() => {
                     clearInterval(validationPoller);
                     if (response.status === 200) {

@@ -1,4 +1,5 @@
 import express, { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 
 interface RawRequest extends Request {
     rawBody?: string;
@@ -144,7 +145,10 @@ router.get("/validate", async (req, res) => {
             res.status(404).send("Not found");
         } else {
             if (doc.payment.hasPaid) {
-                res.status(200).send("OK");
+                res.status(200).send({
+                    jwt: jwt.sign({booking_id: doc.booking_id}, process.env.JWT_SECRET!, {expiresIn: '1h'}),
+                    booking_id: doc.booking_id
+                });
             } else {
                 res.status(503).send("Not yet")
             }
@@ -153,5 +157,9 @@ router.get("/validate", async (req, res) => {
         res.status(500).send(err);
     }
 });
+
+router.get("/ticket/:booking_id", async (req, res) => {
+    res.send(await BookingModel.findOne({booking_id: req.params.booking_id}));
+}) 
 
 app.listen(5175, () => { console.log("Backend is running on port 5175") });
