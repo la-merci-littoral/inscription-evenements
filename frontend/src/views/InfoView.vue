@@ -3,8 +3,12 @@
 import '@fontsource/krona-one';
 import '@fontsource/orienta';
 import { usePersonStore } from '@/stores/person';
-
+import type Event from '@/types/event';
+var person = usePersonStore();
 import { onMounted } from 'vue';
+
+const selectedEvent: Event = JSON.parse(sessionStorage.getItem('events')!).filter((event: any) => event.id === person.event_id)[0];
+const priceCat = selectedEvent.price_categories.filter((category: any) => category.type === person.price_category)[0]
 
 function validateForm() {
   const inputs = document.querySelectorAll('#info-form input');
@@ -27,14 +31,8 @@ onMounted(() => {
     input.addEventListener('input', () => {
       var regexToTest = new RegExp('');
       switch (input.id) {
-        case "email":
-          regexToTest = /\S+@\S+\.\S+/;
-          break;
         case "phone":
           regexToTest = /(0|(\+33[\s]?([0]?|[(0)]{3}?)))[1-9]([-. ]?[0-9]{2}){4}/;
-          break;
-        case "zip":
-          regexToTest = /\d{5}/;
           break;
         default:
           regexToTest = /\p{L}/u; // For all the others
@@ -54,15 +52,14 @@ onMounted(() => {
     input.dispatchEvent(new Event('input'));
   });
   validateForm();
-});
-
-var person = usePersonStore();
+})
 
 </script>
 
 <template>
   <div id="info-wrapper">
-    <h2>Informations personnelles</h2>
+    <h2 :class="{ onlytitle: person.member_id == 0 }">Informations personnelles</h2>
+    <h4 id="member-data" v-if="person.member_id > 0">Vos données ont été chargées car vous êtes adhérent</h4>
     <div id="info-form">
 
       <label for="name">
@@ -84,28 +81,8 @@ var person = usePersonStore();
         Téléphone
         <input type="tel" id="phone" name="phone" required v-model="person.phone">
       </label>
-
-      <label for="address">
-        Adresse
-        <input type="text" id="address" name="address" required v-model="person.address">
-      </label>
-
-      <label for="zip">
-        Code postal
-        <input type="text" id="zip" name="zip" required v-model="person.zip">
-      </label>
-
-      <label for="city">
-        Ville
-        <input type="text" id="city" name="city" required v-model="person.city">
-      </label>
-
-      <label for="country">
-        Pays
-        <input type="text" id="country" name="country" required v-model="person.country">
-      </label>
-
     </div>
+    <h4 id="category-sentence">Vous êtes en catégorie "{{ priceCat.display }}" ({{ priceCat.price }} €)</h4>
     <RouterLink to="/paiement"><button type="submit">Continuer</button></RouterLink>
   </div>
 </template>
@@ -127,13 +104,27 @@ var person = usePersonStore();
   h2 {
     font-family: 'Krona One', sans-serif;
     text-align: center;
+    margin-bottom: 5px;
+  }
+
+  h2.onlytitle {
     margin-bottom: 20px;
+  }
+
+  h4 {
+    font-family: 'Orienta', sans-serif;
+    text-align: center;
+  }
+
+  h4#member-data {
+    margin-bottom: 20px;
+    margin-top: 0px;
   }
 
   #info-form {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
     column-gap: 4vw;
     row-gap: 20px;
     grid-auto-flow: column;
@@ -164,9 +155,15 @@ var person = usePersonStore();
     border-color: #e62727;
   }
 
+  #info-wrapper p {
+    font-size: 110%;
+    font-family: 'Orienta', sans-serif;
+    margin-top: 15px;
+  }
+
   button[type="submit"] {
     font-family: 'Orienta', sans-serif;
-    margin-top: 40px;
+    margin-top: 15px;
     font-size: 120%;
     padding: 10px;
     background-color: #474646;
