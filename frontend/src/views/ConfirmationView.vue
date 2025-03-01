@@ -6,7 +6,7 @@ const person = usePersonStore();
 <template>
     <div id="confirmation-wrapper">
         <h2>Confirmation</h2>
-        <p>Merci pour votre adhésion {{ person.fullName }} !</p>
+        <p>Merci pour votre inscription {{ person.fullName }} !</p>
         <p>Vous allez recevoir un email de confirmation</p>
     </div>
 </template>

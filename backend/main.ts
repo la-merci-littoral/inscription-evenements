@@ -143,7 +143,11 @@ router.get("/validate", async (req, res) => {
         if (!doc) {
             res.status(404).send("Not found");
         } else {
-            res.status(200).send("OK");
+            if (doc.payment.hasPaid) {
+                res.status(200).send("OK");
+            } else {
+                res.status(503).send("Not yet")
+            }
         }
     } catch (err) {
         res.status(500).send(err);
