@@ -107,7 +107,7 @@ async function handlePaymentSubmit() {
             </StripeElementsVue>
             <div id="buttons-row">
                 <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
-                <button type="submit" :class="{ activated: paymentFormComplete }">Payer les 10€</button>
+                <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ person.price }}€</button>
             </div>
         </form>
         <Loader v-if="!stripeRendered && !userExists"></Loader>

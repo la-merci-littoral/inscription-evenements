@@ -31,9 +31,9 @@ const stripe = new Stripe(process.env.STRIPE_SK!);
 
 mongoose.connect(process.env.MONGO_CONN_STR!)
 
-async function generatePaymentIntent() {
+async function generatePaymentIntent(amount: number) {
     const paymentIntent = await stripe.paymentIntents.create({
-        amount: parseInt(process.env.AMOUNT!),
+        amount: amount,
         currency: 'eur'
     });
     return [paymentIntent.id, paymentIntent.client_secret!];
@@ -80,15 +80,17 @@ router.put("/booking", async (req, res) => {
     
     var paymentIntentSecret = userData.pi_secret
     var paymentIntentId = "";
-
+    console.log(userData)
+    var price = await EventModel.findById(userData.event_id).then((event) => event!.price_categories.find((price) => price.type === userData.price_category)!.price);
+    console.log(price)
     if (paymentIntentSecret === "") {
         console.log("Generating new payment intent");
-        [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent();
+        [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
     } else {
         paymentIntentId = RegExp(/(.*)_secret_(.*)/gm).exec(paymentIntentSecret as string)![1]
         await stripe.paymentIntents.retrieve(paymentIntentId).then(async (paymentIntentObject) => {
             if (paymentIntentObject.status === "succeeded") {
-                [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent();
+                [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
             }
         })
     }
