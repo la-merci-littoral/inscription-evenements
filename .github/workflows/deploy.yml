@@ -57,6 +57,16 @@ jobs:
           source: frontend/dist/*
           overwrite: true
           strip_components: 1
+      
+      - name: Transfer Nginx Config to VPS
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          target: /etc/nginx/sites-available/
+          source: nginx.conf
+          overwrite: true
 
       - name: Reload Backend on VPS
         uses: appleboy/ssh-action@v0.1.1
@@ -68,10 +78,10 @@ jobs:
             cd /web/inscription-evenements/backend/
             cp ../.env.production .
             npm install --omit=dev
-            if pm2 describe adhesion-backend > /dev/null; then
-              NODE_ENV=production pm2 restart adhesion-backend --update-env
+            if pm2 describe inscription-backend > /dev/null; then
+              NODE_ENV=production pm2 restart inscription-backend --update-env
             else
-              NODE_ENV=production pm2 start /web/inscription-evenements/backend/dist/main.js --name adhesion-backend
+              NODE_ENV=production pm2 start /web/inscription-evenements/backend/dist/main.js --name inscription-backend
             fi
             pm2 save
       
