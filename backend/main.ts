@@ -11,6 +11,8 @@ import mongoose from 'mongoose';
 import BookingModel from './schemas/bookings';
 import EventModel from './schemas/events';
 import MemberModel from './schemas/members';
+import { IBooking } from './types/booking';
+import { IEvent } from './types/event';
 
 
 const envPath = process.env.NODE_ENV === 'production' ? '../.env.production' : '../.env.development';
@@ -158,8 +160,34 @@ router.get("/validate", async (req, res) => {
     }
 });
 
+function generatePdfTicket(booking: IBooking, event: IEvent){
+    
+}
+
 router.get("/ticket/:booking_id", async (req, res) => {
-    res.send(await BookingModel.findOne({booking_id: req.params.booking_id}));
+    const token = req.headers.authorization;
+    if (!token) {
+        res.status(401).send("Unauthorized");
+        return;
+    }
+    jwt.verify(token.split(" ")[1], process.env.JWT_SECRET!, async (err, decoded) => {
+        if (err || (decoded as any).booking_id !== req.params.booking_id) {
+            res.status(403).send("Unauthorized");
+            return;
+        }
+        const booking = await BookingModel.findOne({ booking_id: req.params.booking_id })
+        if (!booking) {
+            res.status(404).send("Not found");
+            return;
+        }
+        const event = await EventModel.findOne({ event_id: booking.event_id });
+        if (!event) {
+            res.status(404).send("Not found");
+            return;
+        }
+        generatePdfTicket(booking as IBooking, event as IEvent)
+        res.send(booking.toJSON());
+    })
 }) 
 
 app.listen(5175, () => { console.log("Backend is running on port 5175") });

@@ -16,11 +16,16 @@ function downloadTicket() {
             'Authorization': 'Bearer ' + token,
         }
     }).then(async (response) => {
+        if (response.status !== 200) {
+            console.error('Error downloading ticket:', response.statusText);
+            isDownloading.value = false;
+            return;
+        }
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'ticket.txt';
+        a.download = 'Ticket-LML-'+booking_id+'-'+person.surname.toUpperCase()+'.json';
         document.body.appendChild(a);
         setTimeout(() => {
             a.click();
