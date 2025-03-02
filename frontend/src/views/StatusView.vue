@@ -9,34 +9,17 @@ const selectedEvent = (JSON.parse(sessionStorage.getItem('events') || '[]') as E
 const filtered_categories = selectedEvent.price_categories.filter(price_category => price_category.type !== 'default');
 
 const memberInvalid = ref(undefined as Boolean | undefined);
-const verifiedCategories = ref([] as string[]);
-
-async function bestCategory(){
-    var best = { category: 'default', price: selectedEvent.price_categories.find(price_category => price_category.type === 'default')!.price };
-    if (verifiedCategories.value.length !== 0) {
-        var prices = verifiedCategories.value.map(category => ({
-            category,
-            price: selectedEvent.price_categories.find(price_category => price_category.type === category)?.price
-        }));
-        prices = prices.filter(price => price.price !== undefined);
-        prices.sort((a, b) => a.price! - b.price!);
-        best = { category: prices[0].category, price: prices[0].price! };
-    }
-    person.price_category = best.category;
-    person.price = best.price;
-}
 
 async function checkAge(birth: string){
     const birthDate = new Date(birth);
     const age = new Date(Date.now() - birthDate.getTime()).getUTCFullYear() - 1970;
     if (age < 18){
-        if (!verifiedCategories.value.includes('minor')) {
-            verifiedCategories.value.push('minor');
+        if (!person.verifiedCategories.find((category) => category.type == 'minor')) {
+            person.verifiedCategories.push(filtered_categories.find((category) => category.type == 'minor')!);
         }
     } else {
-        verifiedCategories.value = verifiedCategories.value.filter(category => category !== 'minor');
+        person.verifiedCategories = person.verifiedCategories.filter(category => category.type !== 'minor');
     }
-    bestCategory()
 }
 
 function checkMember(member_id: number){
@@ -44,31 +27,28 @@ function checkMember(member_id: number){
         .then(response => {
             if (response.status === 404){
                 memberInvalid.value = true;
-                verifiedCategories.value = verifiedCategories.value.filter(category => category !== 'member');
+                person.verifiedCategories = person.verifiedCategories.filter(category => category.type !== 'member');
             } else {
                 memberInvalid.value = false;
-                if (!verifiedCategories.value.includes('member')){
-                    verifiedCategories.value.push('member');
-                };
+                if (!person.verifiedCategories.find((category) => category.type == 'member')) {
+                    person.verifiedCategories.push(filtered_categories.find((category) => category.type == 'member')!);
+                }
                 return response.json();
             }
         })
         .then(data => {
             person.$patch(data);
         })
-    bestCategory()
 }
 
 onBeforeMount(() => {
     if (person.member_id !== 0){
         checkMember(person.member_id);
     }
+    if (person.birth !== ''){
+        checkAge(person.birth as string);
+    }
 })
-
-onUnmounted(() => {
-    bestCategory()
-})
-
 </script>
 
 <template>

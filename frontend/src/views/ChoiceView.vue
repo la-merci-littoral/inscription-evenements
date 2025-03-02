@@ -35,14 +35,13 @@ onBeforeMount(() => {
 })
 
 function chooseEvent(eventId: string) {
-    person.event_id = eventId;
     const selectedEvent = events.value.find(event => event.id === eventId);
     if (selectedEvent) {
-        console.log(selectedEvent)
+        person.event_id = eventId;
+        person.verifiedCategories.push(selectedEvent.price_categories.find(category => category.type === 'default')!);
         if (selectedEvent.price_categories.length > 1){
             router.push('/statut')
         } else {
-            person.price_category = 'default';
             router.push('/mes-informations')
         }
     }

@@ -3,12 +3,10 @@
 import '@fontsource/krona-one';
 import '@fontsource/orienta';
 import { usePersonStore } from '@/stores/person';
-import type Event from '@/types/event';
 var person = usePersonStore();
-import { onMounted } from 'vue';
+import { onBeforeMount, onMounted, ref } from 'vue';
 
-const selectedEvent: Event = JSON.parse(sessionStorage.getItem('events')!).filter((event: any) => event.id === person.event_id)[0];
-const priceCat = selectedEvent.price_categories.filter((category: any) => category.type === person.price_category)[0]
+const priceCat = ref(person.bestPriceCategory)
 
 function validateForm() {
   const inputs = document.querySelectorAll('#info-form input');
