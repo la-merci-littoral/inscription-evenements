@@ -105,5 +105,5 @@ jobs:
           password: ${{ secrets.VPS_PASSWORD }}
           script: |
             mv /etc/nginx/sites-available/nginx.conf /etc/nginx/sites-available/inscription-evenements.conf
-            ln -sf /etc/nginx/sites-available/inscriptions-evenements.conf /etc/nginx/sites-enabled/inscription-evenements.conf
+            ln -sf /etc/nginx/sites-available/inscription-evenements.conf /etc/nginx/sites-enabled/inscription-evenements.conf
             nginx -s reload
