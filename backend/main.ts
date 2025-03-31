@@ -41,12 +41,15 @@ async function generatePaymentIntent(amount: number) {
 
 router.get("/events", async (req,res) => {
     // const dbEvents = await EventModel.find({date_start: {$gte: new Date()}}).sort({date_start: 1});
-    const dbEvents = await EventModel.find({}).sort({ date_start: 1 });
+    const dbEvents = await EventModel.find({});
     const events = dbEvents.map((dbEvent) => {
         return {
             ...dbEvent.toObject()
         }
     })
+    await Promise.all(events.map(async (event) => {
+        event.bookings_left = event.limit - await BookingModel.countDocuments({"event_id": event._id, "payment.hasPaid": true}) as number;
+    }));
     res.send(events)
 })
 

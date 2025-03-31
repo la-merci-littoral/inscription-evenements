@@ -1,5 +1,6 @@
 import { model, Model, Schema } from "mongoose";
 import { IEvent } from "../types/event";
+import BookingModel from "./bookings";
 
 const EventSchema: Schema<IEvent> = new Schema({
     display_name: { type: String, required: true },
@@ -10,8 +11,10 @@ const EventSchema: Schema<IEvent> = new Schema({
         type: { type: String, required: true },
         price: { type: Number, required: true },
         display: { type: String, required: true }
-    }]
-})
+    }],
+    order: { type: Number, required: true },
+    limit: { type: Number, required: true },
+});
 
 const EventModel: Model<IEvent> = model("event", EventSchema, "evenement");
 export default EventModel;

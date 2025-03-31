@@ -39,7 +39,6 @@ export default defineConfig({
   server: serverConfig,
   envDir: '../',
   define: {
-    'import.meta.env.AMOUNT': JSON.stringify(parseInt(process.env.AMOUNT!)),
     'import.meta.env.STRIPE_PK': JSON.stringify(process.env.STRIPE_PK),
     'import.meta.env.BASE_URL': JSON.stringify(process.env.BASE_URL),
   }

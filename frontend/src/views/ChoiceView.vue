@@ -26,6 +26,13 @@ onBeforeMount(() => {
                     ...event,
                     id: event._id
                 }
+            }).sort((a: Event, b: Event) => {
+                const dateComparison = new Date(a.date_start).setHours(0, 0, 0, 0) - new Date(b.date_start).setHours(0, 0, 0, 0);
+                console.log(dateComparison)
+                if (dateComparison !== 0) {
+                    return dateComparison;
+                }
+                return (a.order || 0) - (b.order || 0);
             });
             sessionStorage.setItem('events', JSON.stringify(events.value));
             setTimeout(() => {
@@ -37,7 +44,7 @@ onBeforeMount(() => {
 function chooseEvent(eventId: string) {
     const selectedEvent = events.value.find(event => event.id === eventId);
     if (selectedEvent) {
-        person.event_id = eventId;
+        person.selectedEvent = selectedEvent;
         person.verifiedCategories.push(selectedEvent.price_categories.find(category => category.type === 'default')!);
         if (selectedEvent.price_categories.length > 1){
             router.push('/statut')
@@ -79,6 +86,7 @@ function chooseEvent(eventId: string) {
                         <p>{{ event.price_categories[0].price }} €</p>
                     </div>
                 </div>
+                <div class="ribbon" v-if="event.bookings_left < 50">Plus que {{ event.bookings_left }} places !</div>
             </div>
             <div v-else>
                 <p>Aucun évènement disponible</p>
@@ -128,6 +136,7 @@ div.event {
     grid-auto-flow: column;
     gap: 20px;
     transition: background-color 0.3s ease;
+    position: relative;
 }
 
 div.event:hover {
@@ -160,6 +169,30 @@ div.event h3 {
 .section-separator {
     width: 2px;
     background-color: white;
+}
+
+/* HTML: <div class="ribbon">Your text content</div> */
+.ribbon {
+  font-size: 17px;
+  font-weight: bold;
+  color: #fff;
+}
+.ribbon {
+  --f: .4em; /* control the folded part*/
+  --r: .8em; /* control the ribbon shape */
+  
+  position: absolute;
+  top: 20px;
+  right: calc(-1*var(--f));
+  padding-inline: .25em;
+  line-height: 1.8;
+  background: #9e3927;
+  border-bottom: var(--f) solid #0005;
+  border-left: var(--r) solid #0000;
+  clip-path: 
+    polygon(var(--r) 0,100% 0,100% calc(100% - var(--f)),calc(100% - var(--f)) 100%,
+      calc(100% - var(--f)) calc(100% - var(--f)),var(--r) calc(100% - var(--f)),
+      0 calc(50% - var(--f)/2));
 }
 
 </style>

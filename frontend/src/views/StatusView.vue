@@ -5,8 +5,7 @@ import { usePersonStore } from '@/stores/person';
 
 
 const person = usePersonStore()
-const selectedEvent = (JSON.parse(sessionStorage.getItem('events') || '[]') as Event[]).find(event => event.id === person.event_id)!;
-const filtered_categories = selectedEvent.price_categories.filter(price_category => price_category.type !== 'default');
+const filtered_categories = person.selectedEvent.price_categories.filter(price_category => price_category.type !== 'default');
 
 const memberInvalid = ref(undefined as Boolean | undefined);
 

@@ -9,6 +9,9 @@ interface Event {
         price: number;
         display: string;
     }[];
+    order: number;
+    limit: number;
+    bookings_left: number;
 }
 
 export default Event;

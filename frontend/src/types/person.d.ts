@@ -8,6 +8,7 @@ interface Person {
     email: string;
     phone: string;
     event_id: string;
+    selectedEvent: Event;
     verifiedCategories: Event['price_categories'];
     bestPriceCategory: Event['price_categories'][0];
     member_id: number;
