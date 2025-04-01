@@ -80,14 +80,43 @@ router.put("/booking", async (req, res) => {
         res.status(409).send("Already paid");
         return;
     }
+
+    const event = await EventModel.findById(userData.selectedEvent.id);
+    if (event === null) {
+        res.status(404).send("Event not found");
+        return;
+    }
+
+    if (event.limit - await BookingModel.countDocuments({"event_id": event._id, "payment.hasPaid": true}) <= 0) {
+        res.status(409).send("No more tickets available");
+        return;
+    }
+
+    var minPrice = 0;
+    for (const cat of event.price_categories) {
+        let shouldMin: boolean;
+        switch (cat.type) {
+            case "member":
+                shouldMin = (userData.member_id != 0) && (await MemberModel.findOne({ "member_id": userData.member_id }) !== null);
+                break;
+            case "minor":
+                shouldMin = (userData.birth != "") && (new Date(userData.birth).getTime() < new Date().getTime() - 18 * 365 * 24 * 60 * 60 * 1000);
+                break;
+            default:
+                shouldMin = false;
+                break;
+        }
+        if ((shouldMin && cat.price < minPrice) || minPrice === 0) {
+            minPrice = cat.price;
+        }
+    }
     
     var paymentIntentSecret = userData.pi_secret
     var paymentIntentId = "";
-    console.log(userData)
-    var price = await EventModel.findById(userData.event_id).then((event) => event!.price_categories.find((price) => price.type === userData.price_category)!.price);
-    console.log(price)
+    const price = minPrice
+
     if (paymentIntentSecret === "") {
-        console.log("Generating new payment intent");
+        // console.log("Generating new payment intent");
         [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
     } else {
         paymentIntentId = RegExp(/(.*)_secret_(.*)/gm).exec(paymentIntentSecret as string)![1]

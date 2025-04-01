@@ -17,10 +17,12 @@ import { ref, onBeforeMount } from "vue";
 import { RouterLink } from "vue-router";
 import router from "@/router";
 
+const person = usePersonStore()
+
 const stripePk = import.meta.env.STRIPE_PK;
 const stripeOptions = ref<StripeElementsOptionsMode>({
     mode: "payment",
-    amount: import.meta.env.AMOUNT,
+    amount: person.bestPriceCategory.price * 100,
     currency: "eur",
     appearance: {
         theme: "flat",
@@ -42,7 +44,6 @@ const clientSecret = ref("")
 const elementsComponent = ref()
 const paymentComponent = ref()
 const paymentFormComplete = ref(false)
-const person = usePersonStore()
 
 var userExists = ref(false)
 

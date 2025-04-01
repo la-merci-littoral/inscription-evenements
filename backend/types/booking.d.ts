@@ -8,6 +8,7 @@ interface IBooking extends Document {
     surname: string;
     email: string;
     phone: string;
+    attendants: number;
     event_id: string;
     date: Date;
     payment: {

@@ -7,6 +7,7 @@ interface Person {
     birth: string | Date;
     email: string;
     phone: string;
+    attendants: number;
     event_id: string;
     selectedEvent: Event;
     verifiedCategories: Event['price_categories'];

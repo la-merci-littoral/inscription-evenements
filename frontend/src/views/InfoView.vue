@@ -32,6 +32,9 @@ onMounted(() => {
         case "phone":
           regexToTest = /(0|(\+33[\s]?([0]?|[(0)]{3}?)))[1-9]([-. ]?[0-9]{2}){4}/;
           break;
+        case "attendants":
+          regexToTest = /\d/
+          break;
         default:
           regexToTest = /\p{L}/u; // For all the others
           break;
@@ -59,26 +62,32 @@ onMounted(() => {
     <h2 :class="{ onlytitle: person.member_id == 0 }">Informations personnelles</h2>
     <h4 id="member-data" v-if="person.member_id > 0">Vos données ont été chargées car vous êtes adhérent</h4>
     <div id="info-form">
+      <div v-for="field in person.selectedEvent.info_fields">
+        <label for="name" v-if="field == 'name'" :key="field">
+          Prénom
+          <input type="text" id="name" name="name" required v-model="person.name">
+        </label>
+  
+        <label for="surname" v-if="field == 'surname'">
+          Nom
+          <input type="text" id="surname" name="surname" required v-model="person.surname">
+        </label>
+  
+        <label for="email" v-if="field == 'email'">
+          Email
+          <input type="email" id="email" name="email" required v-model="person.email">
+        </label>
+  
+        <label for="phone" v-if="field == 'phone'">
+          Téléphone
+          <input type="tel" id="phone" name="phone" required v-model="person.phone">
+        </label>
 
-      <label for="name">
-        Prénom
-        <input type="text" id="name" name="name" required v-model="person.name">
-      </label>
-
-      <label for="surname">
-        Nom
-        <input type="text" id="surname" name="surname" required v-model="person.surname">
-      </label>
-
-      <label for="email">
-        Email
-        <input type="email" id="email" name="email" required v-model="person.email">
-      </label>
-
-      <label for="phone">
-        Téléphone
-        <input type="tel" id="phone" name="phone" required v-model="person.phone">
-      </label>
+        <label for="phone" v-if="field == 'attendants'">
+          Accompagnants
+          <input type="tel" id="phone" name="attendants" required v-model="person.attendants">
+        </label>
+      </div>
     </div>
     <h4 id="category-sentence">Vous êtes en catégorie "{{ priceCat.display }}" ({{ priceCat.price }} €)</h4>
     <RouterLink to="/paiement"><button type="submit">Continuer</button></RouterLink>

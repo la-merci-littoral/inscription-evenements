@@ -13,4 +13,5 @@ interface IEvent extends Document {
     order: number;
     limit: number;
     bookings_left: number;
+    fields: ('name' | 'surname' | 'email' | 'phone' | 'attendants')[];
 }
