@@ -69,10 +69,23 @@ router.get("/member/:member_id", async (req, res) => {
 
 router.put("/booking", async (req, res) => {
     var userData = req.body;
+    console.log(userData)
+
+    if (userData.selectedEvent === undefined) {
+        res.status(400).send("No event selected");
+        return;
+    }
+
+    var searchCond: Array<{ booking_id?: any; email?: string }> = [{ "booking_id": userData.booking_id }];
+    if (userData.email !== ''){
+        searchCond.push({ "email": userData.email })
+    }
 
     const potentialFind = await BookingModel.findOne({
         $and: [
-            { "email": userData.email },
+            {
+                $or: searchCond
+            },
             { "payment.hasPaid": true }
         ]
     })
@@ -115,39 +128,44 @@ router.put("/booking", async (req, res) => {
     var paymentIntentId = "";
     const price = minPrice
 
-    if (paymentIntentSecret === "") {
-        // console.log("Generating new payment intent");
-        [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
+    if (price > 0){
+        if (paymentIntentSecret === "") {
+            // console.log("Generating new payment intent");
+            [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
+        } else {
+            paymentIntentId = RegExp(/(.*)_secret_(.*)/gm).exec(paymentIntentSecret as string)![1]
+            await stripe.paymentIntents.retrieve(paymentIntentId).then(async (paymentIntentObject) => {
+                if (paymentIntentObject.status === "succeeded") {
+                    [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
+                }
+            })
+        }
     } else {
-        paymentIntentId = RegExp(/(.*)_secret_(.*)/gm).exec(paymentIntentSecret as string)![1]
-        await stripe.paymentIntents.retrieve(paymentIntentId).then(async (paymentIntentObject) => {
-            if (paymentIntentObject.status === "succeeded") {
-                [paymentIntentId, paymentIntentSecret] = await generatePaymentIntent(price*100);
-            }
-        })
+        paymentIntentId = "none";
     }
 
     userData = {
         ...userData,
+        event_id: userData.selectedEvent.id,
         date: new Date(),
         payment: {
             hasPaid: false,
             date: new Date(0),
             method: "none",
-            intentId: paymentIntentId
+            intentId: paymentIntentId,
+            price: price
         }
     }
     delete userData.pi_secret;
 
-    await BookingModel.updateOne({
-        $or: [
-            { "email": userData.email },
-            { "payment.intentId": paymentIntentId }
-        ]
-    }, userData, {upsert: true})
+    const doc = await BookingModel.findOneAndUpdate({
+        $or: searchCond
+    }, userData, {upsert: true, new: true});
 
     res.send({
         clientSecret: paymentIntentSecret,
+        amount: price,
+        booking_id: doc.booking_id
     })
 
 });
@@ -166,10 +184,14 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
         await BookingModel.findOneAndUpdate({"payment.intentId": event.data.object.id}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": event.data.object.payment_method});
-        console.log(event.data.object.id + " has been paid");
     }
     res.json({received: true});
 });
+
+router.post("/payment/null", async (req, res) => {
+    await BookingModel.findOneAndUpdate({"booking_id": req.body.booking_id}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": 'none'});
+    res.json({received: true});
+})
 
 router.get("/validate", async (req, res) => {
     const paymentIntent = req.query.pi;

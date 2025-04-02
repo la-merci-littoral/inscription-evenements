@@ -16,13 +16,13 @@ onMounted(() => {
             },
         })
             .then(async (response) => {
-                localStorage.setItem('ticket_info', JSON.stringify(await response.json() as { jwt: string, booking_id: string }));
-                setTimeout(() => {
+                setTimeout(async () => {
                     clearInterval(validationPoller);
                     if (response.status === 200) {
+                        localStorage.setItem('ticket_info', JSON.stringify(await response.json() as { jwt: string; booking_id: string; }));
                         router.push({ path: '/confirmation' });
                     }
-                },1500);
+                }, 1500);
             })
     }, 1000);
     setTimeout(() => {

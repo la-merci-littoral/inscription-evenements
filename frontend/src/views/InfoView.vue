@@ -83,9 +83,9 @@ onMounted(() => {
           <input type="tel" id="phone" name="phone" required v-model="person.phone">
         </label>
 
-        <label for="phone" v-if="field == 'attendants'">
+        <label for="attendants" v-if="field == 'attendants'">
           Accompagnants
-          <input type="tel" id="phone" name="attendants" required v-model="person.attendants">
+          <input type="tel" id="attendants" name="attendants" required :value="person.attendants - 1" @input="person.attendants = ($event.target as HTMLInputElement)?.value ? parseInt(($event.target as HTMLInputElement).value) + 1 : 1">
         </label>
       </div>
     </div>
@@ -130,12 +130,17 @@ onMounted(() => {
 
   #info-form {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
     column-gap: 4vw;
     row-gap: 20px;
     grid-auto-flow: column;
     font-family: 'Orienta', sans-serif;
+  }
+
+  #info-form:has(div:nth-child(2)) {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
   }
 
   #info-form label {

@@ -61,7 +61,7 @@ function chooseEvent(eventId: string) {
     <div id="choice-wrapper">
         <h2>Choix de l'évènement</h2>
         <div id="events-list" v-if="loadedEvents">
-            <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0" @click="chooseEvent(event.id)">
+            <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0" @click="event.bookings_left > 0 ? chooseEvent(event.id) : null" :class="{ 'event-disabled': event.bookings_left == 0 }">
                 <h3>{{ event.display_name }}</h3>
                 <div class="info-section">
                     <div class="info-item">
@@ -80,13 +80,17 @@ function chooseEvent(eventId: string) {
                         <p>{{ price_category.price }} €</p>
                     </div>
                 </div>
-                <div class="prices-section" v-else>
+                <div class="prices-section" v-else-if="event.price_categories[0].price > 0">
                     <div class="info-item">
-                        <p>Prix unique :</p>
+                        <p>Tarif unique :</p>
                         <p>{{ event.price_categories[0].price }} €</p>
                     </div>
                 </div>
-                <div class="ribbon" v-if="event.bookings_left < 50">Plus que {{ event.bookings_left }} places !</div>
+                <div class="prices-section" v-else>
+                    <p id="free-indicator">Gratuit !</p>
+                </div>
+                <div class="ribbon" v-if="event.bookings_left < 50 && event.bookings_left > 0">Plus que {{ event.bookings_left }} places !</div>
+                <div class="ribbon" v-if="event.bookings_left == 0">Complet</div>
             </div>
             <div v-else>
                 <p>Aucun évènement disponible</p>
@@ -145,6 +149,10 @@ div.event:hover {
     transition: background-color 0.3s ease;
 }
 
+div.event-disabled:hover {
+    cursor: not-allowed;
+}
+
 div.event h3, div.event p{
     margin: 0;
 }
@@ -164,6 +172,12 @@ div.event h3 {
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 10px;
+}
+
+#free-indicator {
+    font-weight: bold;
+    font-size: 20px;
+    text-align: center;
 }
 
 .section-separator {

@@ -44,29 +44,35 @@ const clientSecret = ref("")
 const elementsComponent = ref()
 const paymentComponent = ref()
 const paymentFormComplete = ref(false)
+const verifiedAmount = ref(person.bestPriceCategory.price)
 
 var userExists = ref(false)
 
-onBeforeMount(() => {
-    
-    loadStripe(stripePk).then(() => {
-        fetch("/api/booking", {
+async function sendUserData(){
+    fetch("/api/booking", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(usePersonStore().$state),
         })
-            .then((response) => {
-                userExists.value = response.status === 409;
-                return response.json();
-            })
-            .then((data) => {
-                clientSecret.value = data.clientSecret;
-                person.$state.pi_secret = clientSecret.value
-                stripeLoaded.value = true
-            });
-    });
+        .then((response) => {
+            userExists.value = response.status === 409;
+            return response.json();
+        })
+        .then((data) => {
+            clientSecret.value = data.clientSecret;
+            verifiedAmount.value = data.amount;
+            person.$state.pi_secret = clientSecret.value
+            person.$state.booking_id = data.booking_id  
+        });
+}
+
+onBeforeMount(async () => {
+    await sendUserData()
+    if (verifiedAmount.value !== 0) {
+        loadStripe(stripePk).then(() => {stripeLoaded.value = true});
+    }
 });
 
 async function handleStripeRendered(){
@@ -94,13 +100,33 @@ async function handlePaymentSubmit() {
     }
 }
 
+function handleNullPayment() {
+    if (verifiedAmount.value !== 0){
+        return
+    }
+    fetch("/api/payment/null", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({"booking_id": person.$state.booking_id})
+    })
+        .then((response) => {
+            if (response.status === 200) {
+                router.push("/validation?payment_intent=none&payment_intent_client_secret=none&redirect_status=succeeded");
+            } else {
+                console.error("Error processing null payment");
+            }
+        })
+}
+
 </script>
 
 <template>
     <div id="payment-wrapper">
         <h2 v-if="!userExists">Paiement</h2>
         <form @submit.prevent="handlePaymentSubmit" :style="{ display: stripeRendered ? 'flex' : 'none' }"
-            v-if="stripeLoaded">
+            v-if="stripeLoaded && verifiedAmount > 0 && !userExists">
             <StripeElementsVue :stripe-key="stripePk" :instance-options="{}" :elements-options="stripeOptions"
                 ref="elementsComponent">
                 <StripeElementVue type="payment" :options="{}" ref="paymentComponent" @ready="handleStripeRendered"
@@ -108,10 +134,17 @@ async function handlePaymentSubmit() {
             </StripeElementsVue>
             <div id="buttons-row">
                 <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
-                <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ person.bestPriceCategory.price }}€</button>
+                <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ verifiedAmount }}€</button>
             </div>
         </form>
-        <Loader v-if="!stripeRendered && !userExists"></Loader>
+        <Loader v-if="!stripeRendered && !userExists && verifiedAmount > 0"></Loader>
+        <div id="free-event" v-if="verifiedAmount === 0 && !userExists">
+            <h3>Aucun paiement à effectuer !</h3>
+            <div id="buttons-row">
+                <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
+                <button type="submit" class="activated" @click="handleNullPayment()">Continuer</button>
+            </div>
+        </div>
         <div id="already-exists" v-if="userExists">
             <h3>Une adhésion est déjà associée à cet email</h3>
             <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
@@ -200,7 +233,7 @@ h3 {
     font-family: 'Lexend', sans-serif;
     text-align: center;
     margin-top: 20px;
-    color: white
+    color: white;
 }
 
 </style>

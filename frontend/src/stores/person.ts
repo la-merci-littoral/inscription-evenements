@@ -11,7 +11,6 @@ export const usePersonStore = defineStore('person', {
     email: '',
     phone: '',
     attendants: 1,
-    event_id: '',
     selectedEvent: {} as Event,
     verifiedCategories: [] as Event["price_categories"],
     member_id: 0,
