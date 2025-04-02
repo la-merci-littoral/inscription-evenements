@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
+import ejs from 'ejs';
 
 interface RawRequest extends Request {
     rawBody?: string;
@@ -242,8 +243,40 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     }
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
-        await BookingModel.findOneAndUpdate({"payment.intentId": event.data.object.id}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": event.data.object.payment_method});
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+
+        const updateResult = await BookingModel.findOneAndUpdate(
+            { "adhesion.payment.intentId": paymentIntent.id },
+            {
+                $set: {
+                    "adhesion.payment.hasPaid": true,
+                    "adhesion.payment.date": new Date(),
+                    "adhesion.payment.method": paymentIntent.payment_method
+                }
+            },
+            { new: true } // Return the updated document
+        );
+
+        if (!updateResult) {
+            res.status(404).send("Not found");
+            return;
+        }
+
+        (updateResult as any).base_url = process.env.BASE_URL;
+        mailTransport.sendMail({
+            from: 'La Merci Ne pas Répondre ne-pas-repondre@amis-du-littoral.fr',
+            to: updateResult.email,
+            subject: "La Merci Littoral - Confirmation d'inscription",
+            html: ejs.render(emailTemplates['inscription-confirm'], updateResult),
+            attachments: [
+                {
+                    filename: "Ticket " + updateResult.booking_id + " - " + updateResult.surname + ".pdf",
+                    content: await generateTicket(updateResult)
+                }
+            ]
+        });
     }
+
     res.json({received: true});
 });
 
@@ -274,6 +307,20 @@ router.get("/validate", async (req, res) => {
 });
 
 router.get("/ticket/:booking_id", async (req, res) => {
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).send("Authorization header missing");
+        return;
+    }
+    const token = authHeader.split(' ')[1];
+    try {
+        jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+        res.status(403).send("Invalid or expired token");
+        return;
+    }
+
     const doc = await BookingModel.findOne({booking_id: req.params.booking_id})
 
     if (doc === null) {
