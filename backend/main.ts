@@ -17,6 +17,7 @@ import MemberModel from './schemas/members';
 import { Template } from '@pdfme/common';
 import { text, barcodes, rectangle, line } from '@pdfme/schemas';
 import { generate } from '@pdfme/generator';
+import { IBooking } from './types/booking';
 
 const envPath = process.env.NODE_ENV === 'production' ? '../.env.production' : '../.env.development';
 require('dotenv').config({path: envPath});
@@ -205,6 +206,29 @@ router.put("/booking", async (req, res) => {
 
 });
 
+async function generateTicket(doc: IBooking) {
+    const event = await EventModel.findById(doc.event_id)
+    const fullname = doc.name + " " + doc.surname;
+
+    const pdf = await generate({
+        template: ticketTemplate,
+        plugins: pdfPlugins,
+        inputs: [{
+            ticketQR: doc.booking_id,
+            ticketNumber: doc.booking_id,
+            eventName: event!.display_name,
+            eventDate: event!.date_start.toLocaleString("fr-FR"),
+            eventLocation: event!.location,
+            personName: fullname == " " ? "Non renseigné" : fullname,
+            personCategory: event!.price_categories.find((cat) => cat.price == doc.payment.price)!.display,
+            price: String(doc.payment.price) + " €",
+            accompanying: String(doc.attendants - 1)
+        }]
+    })
+
+    return Buffer.from(pdf)
+}
+
 router.post("/payment/webhook", express.raw({type: 'application/json'}),async (req, res) => {
 
     const sig = req.headers['stripe-signature'];
@@ -250,8 +274,6 @@ router.get("/validate", async (req, res) => {
 });
 
 router.get("/ticket/:booking_id", async (req, res) => {
-    // res.send(await BookingModel.findOne({booking_id: req.params.booking_id}));
-
     const doc = await BookingModel.findOne({booking_id: req.params.booking_id})
 
     if (doc === null) {
@@ -259,27 +281,8 @@ router.get("/ticket/:booking_id", async (req, res) => {
         return
     }
 
-    const event = await EventModel.findById(doc.event_id)
-    const fullname = doc.name + " " + doc.surname;
-
-    const pdf = await generate({
-        template: ticketTemplate,
-        plugins: pdfPlugins,
-        inputs: [{
-            ticketQR: doc.booking_id,
-            ticketNumber: doc.booking_id,
-            eventName: event!.display_name,
-            eventDate: event!.date_start.toLocaleString("fr-FR"),
-            eventLocation: event!.location,
-            personName: fullname == " " ? "Non renseigné" : fullname,
-            personCategory: event!.price_categories.find((cat) => cat.price == doc.payment.price)!.display,
-            price: String(doc.payment.price) + " €",
-            accompanying: String(doc.attendants - 1)
-        }]
-    })
-
     res.setHeader('Content-Type', 'application/pdf');
-    res.send(Buffer.from(pdf));
+    res.send(await generateTicket(doc));
 })
 
 app.listen(5175, () => { console.log("Backend is running on port 5175") });
