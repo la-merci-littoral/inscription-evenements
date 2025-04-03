@@ -37,7 +37,7 @@ onMounted(() => {
     <div id="validation-wrapper">
         <h2>Validation en cours</h2>
         <Loader v-if="!validationError"/>
-        <h4 v-if="validationError">Une erreur est survenue lors de la validation de votre inscription<br>Veuillez contacter le lycée</h4>
+        <h4 v-if="validationError">Une erreur est survenue lors de la validation de votre inscription<br>Cliquez sur le bouton d'aide ci-dessous</h4>
     </div>
 </template>
 
