@@ -44,7 +44,7 @@ const clientSecret = ref("")
 const elementsComponent = ref()
 const paymentComponent = ref()
 const paymentFormComplete = ref(false)
-const verifiedAmount = ref(person.bestPriceCategory.price)
+const verifiedAmount = ref(-1) //ref(person.bestPriceCategory.price)
 
 var userExists = ref(false)
 
@@ -138,7 +138,7 @@ function handleNullPayment() {
             </div>
         </form>
         <Loader v-if="!stripeRendered && !userExists && verifiedAmount > 0"></Loader>
-        <div id="free-event" v-if="verifiedAmount === 0 && !userExists">
+        <div id="free-event" v-if="verifiedAmount !== -1 && !userExists">
             <h3>Aucun paiement à effectuer !</h3>
             <div id="buttons-row">
                 <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
