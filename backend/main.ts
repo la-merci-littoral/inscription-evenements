@@ -218,7 +218,7 @@ async function generateTicket(doc: IBooking) {
             ticketQR: doc.booking_id,
             ticketNumber: doc.booking_id,
             eventName: event!.display_name,
-            eventDate: event!.date_start.toLocaleString("fr-FR"),
+            eventDate: event!.date_start.toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
             eventLocation: event!.location,
             personName: fullname == " " ? "Non renseigné" : fullname,
             personCategory: event!.price_categories.find((cat) => cat.price == doc.payment.price)!.display,

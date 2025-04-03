@@ -28,7 +28,6 @@ onBeforeMount(() => {
                 }
             }).sort((a: Event, b: Event) => {
                 const dateComparison = new Date(a.date_start).setHours(0, 0, 0, 0) - new Date(b.date_start).setHours(0, 0, 0, 0);
-                console.log(dateComparison)
                 if (dateComparison !== 0) {
                     return dateComparison;
                 }
@@ -66,7 +65,7 @@ function chooseEvent(eventId: string) {
                 <div class="info-section">
                     <div class="info-item">
                         <Calendar :size="24" />
-                        <p>{{ new Date(event.date_start).toLocaleString("fr-FR") }}</p>
+                        <p>{{ new Date(event.date_start).toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) }}</p>
                     </div>
                     <div class="info-item">
                         <MapPin :size="24" />
