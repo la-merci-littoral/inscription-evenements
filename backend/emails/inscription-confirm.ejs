@@ -21,10 +21,15 @@
             text-align: center;
         }
 
-        span#member_id {
+        span#booking_id {
             font-weight: bold;
             font-size: 120%;
             color: #1f76c7;
+        }
+
+        span#eventName {
+            font-weight: bold;
+            font-size: 105%;
         }
     </style>
 </head>
@@ -38,20 +43,22 @@
             </tr>
             <tr>
                 <td>
-                    <h2 style="margin: 0;">Association des Amis du Littoral</h2>
+                    <h2 style="margin: 0;">Lycée La Merci Littoral</h2>
                 </td>
             </tr>
         </table>
     </header>
     <main>
         <p>Bonjour <%= name %> <%= surname %> !</p>
-        <p>L'association des Amis du Littoral vous remercie pour votre adhésion en date du <%= adhesion.date.toLocaleDateString('fr-FR') %> à <%= adhesion.date.toLocaleTimeString('fr-FR') %>.</p>
+        <p>Le lycée vous remercie pour votre inscription en date du <%= date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }) %> à <%= date.toLocaleTimeString('fr-FR', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit' }) %>.</p>
         <p>
-            Votre numéro d'adhérent est le <span id="member_id"><%= member_id %></span>.
+            Votre numéro d'inscription pour l'évènement <span id="eventName"><%= eventName %></span> est le <span id="booking_id"><%= booking_id %></span>.
             <br>
-            Ce numéro est à conserver car il vous sera demandé pour bénéficier de remise sur les évènements organisés par l’ADAL.
+            Votre ticket, que vous trouverez en pièce-jointe, devra être présenté (matériellement ou numériquement) à l'entrée de l'événement.
+            <br>
+            Les informations sur l'évènement sont disponibles sur votre ticket !
         </p>
-        <p>A très bientôt !<br>Le BDE du lycée La Merci Littoral<br><a href="mailto:contact@amis-du-littoral.fr">contact@amis-du-littoral.fr</a></p>
+        <p>A très bientôt !<br>Le lycée La Merci Littoral<br><a href="mailto:contact@amis-du-littoral.fr">contact@amis-du-littoral.fr</a></p>
     </main>
 </body>
 </html>

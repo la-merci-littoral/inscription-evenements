@@ -19,6 +19,7 @@ import { Template } from '@pdfme/common';
 import { text, barcodes, rectangle, line } from '@pdfme/schemas';
 import { generate } from '@pdfme/generator';
 import { IBooking } from './types/booking';
+import { IEvent } from './types/event';
 
 const envPath = process.env.NODE_ENV === 'production' ? '../.env.production' : '../.env.development';
 require('dotenv').config({path: envPath});
@@ -106,7 +107,6 @@ router.get("/member/:member_id", async (req, res) => {
 
 router.put("/booking", async (req, res) => {
     var userData = req.body;
-    console.log(userData)
 
     if (userData.selectedEvent === undefined) {
         res.status(400).send("No event selected");
@@ -207,23 +207,22 @@ router.put("/booking", async (req, res) => {
 
 });
 
-async function generateTicket(doc: IBooking) {
-    const event = await EventModel.findById(doc.event_id)
-    const fullname = doc.name + " " + doc.surname;
+async function generateTicket(bookingDetails: IBooking, eventDetails: IEvent) {
+    const fullname = bookingDetails.name + " " + bookingDetails.surname;
 
     const pdf = await generate({
         template: ticketTemplate,
         plugins: pdfPlugins,
         inputs: [{
-            ticketQR: doc.booking_id,
-            ticketNumber: doc.booking_id,
-            eventName: event!.display_name,
-            eventDate: event!.date_start.toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
-            eventLocation: event!.location,
+            ticketQR: bookingDetails.booking_id,
+            ticketNumber: bookingDetails.booking_id,
+            eventName: eventDetails!.display_name,
+            eventDate: eventDetails!.date_start.toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
+            eventLocation: eventDetails!.location,
             personName: fullname == " " ? "Non renseigné" : fullname,
-            personCategory: event!.price_categories.find((cat) => cat.price == doc.payment.price)!.display,
-            price: String(doc.payment.price) + " €",
-            accompanying: String(doc.attendants - 1)
+            personCategory: eventDetails!.price_categories.find((cat) => cat.price == bookingDetails.payment.price)!.display,
+            price: String(bookingDetails.payment.price) + " €",
+            accompanying: String(bookingDetails.attendants - 1)
         }]
     })
 
@@ -243,15 +242,15 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     }
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        event = req.body as Stripe.PaymentIntentSucceededEvent
 
         const updateResult = await BookingModel.findOneAndUpdate(
-            { "adhesion.payment.intentId": paymentIntent.id },
+            { "payment.intentId": event.data.object.id },
             {
                 $set: {
-                    "adhesion.payment.hasPaid": true,
-                    "adhesion.payment.date": new Date(),
-                    "adhesion.payment.method": paymentIntent.payment_method
+                    "payment.hasPaid": true,
+                    "payment.date": new Date(),
+                    "payment.method": event.data.object.payment_method_types[0],
                 }
             },
             { new: true } // Return the updated document
@@ -262,7 +261,10 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
             return;
         }
 
+        const eventDetails = await EventModel.findById(updateResult.event_id);
+
         (updateResult as any).base_url = process.env.BASE_URL;
+        (updateResult as any).eventName = eventDetails!.display_name;
         mailTransport.sendMail({
             from: 'La Merci Ne pas Répondre ne-pas-repondre@amis-du-littoral.fr',
             to: updateResult.email,
@@ -271,7 +273,7 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
             attachments: [
                 {
                     filename: "Ticket " + updateResult.booking_id + " - " + updateResult.surname + ".pdf",
-                    content: await generateTicket(updateResult)
+                    content: await generateTicket(updateResult, eventDetails!)
                 }
             ]
         });
@@ -281,7 +283,8 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
 });
 
 router.post("/payment/null", async (req, res) => {
-    await BookingModel.findOneAndUpdate({"booking_id": req.body.booking_id}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": 'none'});
+    // Only works for free events
+    await BookingModel.findOneAndUpdate({$and: [{"booking_id": req.body.booking_id}, {"payment.price": 0}]}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": 'none'});
     res.json({received: true});
 })
 
@@ -328,8 +331,10 @@ router.get("/ticket/:booking_id", async (req, res) => {
         return
     }
 
+    const eventDetails = await EventModel.findById(doc.event_id);
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.send(await generateTicket(doc));
+    res.send(await generateTicket(doc, eventDetails!));
 })
 
 app.listen(5175, () => { console.log("Backend is running on port 5175") });

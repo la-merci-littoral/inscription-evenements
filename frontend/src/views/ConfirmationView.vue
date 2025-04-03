@@ -20,7 +20,7 @@ function downloadTicket() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'ticket.txt';
+        a.download = "Ticket " + booking_id + " - " + person.surname + ".pdf";
         document.body.appendChild(a);
         setTimeout(() => {
             a.click();

@@ -137,8 +137,8 @@ function handleNullPayment() {
                 <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ verifiedAmount }}€</button>
             </div>
         </form>
-        <Loader v-if="!stripeRendered && !userExists && verifiedAmount > 0"></Loader>
-        <div id="free-event" v-if="verifiedAmount !== -1 && !userExists">
+        <Loader v-if="!stripeRendered && !userExists"></Loader>
+        <div id="free-event" v-if="verifiedAmount === 0 && !userExists">
             <h3>Aucun paiement à effectuer !</h3>
             <div id="buttons-row">
                 <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
