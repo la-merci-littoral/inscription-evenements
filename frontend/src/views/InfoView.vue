@@ -145,7 +145,7 @@ onMounted(() => {
 
   #info-form:has(div:nth-child(3)) {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
+    grid-auto-flow: row;
   }
 
   #info-form label {
