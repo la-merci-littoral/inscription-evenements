@@ -11,7 +11,7 @@ const person = usePersonStore()
 
 onMounted(() => {
     const validationPoller = setInterval(() => {
-        fetch(`/api/validate?pi=${route.query.payment_intent}&id=${person.booking_id}`, {
+        fetch(`/api/validate?pi=${route.query.payment_intent}&id=${person.$state.booking_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
