@@ -47,6 +47,12 @@ function downloadTicket() {
         <div id="download-ticket" v-else>
             <Loader />
         </div>
+        <p id="email-info">
+            Vous allez recevoir un email avec votre ticket à l'adresse suivante : <span style="font-style: italic;">{{ person.email }}</span>
+            <br>
+            <span id="junk-warning">Pensez à vérifier vos spams !</span>
+        </p>
+        <p id="session-end">Cette session s'est vidée, vous pouvez à présent fermer l'onglet ou la fenêtre.</p>
     </div>
 </template>
 
@@ -91,13 +97,29 @@ div#download-ticket {
     margin-top: 25px;
     font-family: 'Lexend', sans-serif;
     transition: background-color ease-in .1s;
-    width: 60%;
+    width: 220px;
     height: 4vh;
 }
 
 div#download-ticket:hover {
     background-color: #1d4e6a;
     transition: background-color ease-in .1s;
+}
+
+p#email-info {
+    font-size: 110%;
+    width: 80%;
+    max-width: 600px; /* Added to limit the width */
+}
+
+span#junk-warning {
+    font-size: 90%;
+}
+
+p#session-end {
+    font-size: 90%;
+    margin-top: 30px;
+    font-style: italic;
 }
 
 </style>
