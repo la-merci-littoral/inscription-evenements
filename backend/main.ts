@@ -113,16 +113,9 @@ router.put("/booking", async (req, res) => {
         return;
     }
 
-    var searchCond: Array<{ booking_id?: any; email?: string }> = [{ "booking_id": userData.booking_id }];
-    if (userData.email !== ''){
-        searchCond.push({ "email": userData.email })
-    }
-
     const potentialFind = await BookingModel.findOne({
         $and: [
-            {
-                $or: searchCond
-            },
+            { "booking_id": userData.booking_id },
             { "payment.hasPaid": true }
         ]
     })
@@ -195,9 +188,7 @@ router.put("/booking", async (req, res) => {
     }
     delete userData.pi_secret;
 
-    const doc = await BookingModel.findOneAndUpdate({
-        $or: searchCond
-    }, userData, {upsert: true, new: true});
+    const doc = await BookingModel.findOneAndUpdate({"booking_id": userData.booking_id}, userData, {upsert: true, new: true});
 
     res.send({
         clientSecret: paymentIntentSecret,

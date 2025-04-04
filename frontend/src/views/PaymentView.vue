@@ -57,7 +57,10 @@ async function sendUserData(){
             body: JSON.stringify(usePersonStore().$state),
         })
         .then((response) => {
-            userExists.value = response.status === 409;
+            if (response.status === 409){
+                userExists.value = true
+                person.$state.booking_id = 0
+            };
             return response.json();
         })
         .then((data) => {
@@ -142,7 +145,7 @@ function handleNullPayment() {
             </div>
         </div>
         <div id="already-exists" v-if="userExists">
-            <h3>Une adhésion est déjà associée à cet email</h3>
+            <h3>Une adhésion est déjà associée à ce numéro d'inscription<br>Veuillez rafraîchir la page pour résoudre le problème</h3>
             <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
         </div>
     </div>
