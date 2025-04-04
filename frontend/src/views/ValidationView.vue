@@ -4,12 +4,14 @@ import Loader from '@/components/Loader.vue';
 import router from '@/router';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { usePersonStore } from '@/stores/person';
 const route = useRoute();
 const validationError = ref(false);
+const person = usePersonStore()
 
 onMounted(() => {
     const validationPoller = setInterval(() => {
-        fetch(`/api/validate?pi=${route.query.payment_intent}`, {
+        fetch(`/api/validate?pi=${route.query.payment_intent}&id=${person.booking_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

@@ -27,7 +27,6 @@ function downloadTicket() {
             window.URL.revokeObjectURL(url);
             isDownloading.value = false;
             localStorage.removeItem('person')
-            sessionStorage.removeItem('events')
         }, 1000)
     }).catch((error) => {
         console.error('Error downloading ticket:', error);

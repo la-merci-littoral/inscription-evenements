@@ -61,10 +61,12 @@ async function sendUserData(){
             return response.json();
         })
         .then((data) => {
-            clientSecret.value = data.clientSecret;
-            verifiedAmount.value = data.amount;
-            person.$state.pi_secret = clientSecret.value
-            person.$state.booking_id = data.booking_id  
+            setTimeout(() => {
+                clientSecret.value = data.clientSecret;
+                verifiedAmount.value = data.amount;
+                person.$state.pi_secret = clientSecret.value
+                person.$state.booking_id = data.booking_id
+            }, 1000);
         });
 }
 
@@ -74,12 +76,6 @@ onBeforeMount(async () => {
         loadStripe(stripePk).then(() => {stripeLoaded.value = true});
     }
 });
-
-async function handleStripeRendered(){
-    setTimeout(() => {
-        stripeRendered.value = true
-    }, 1000)
-}
 
 async function handlePaymentSubmit() {
     if (paymentFormComplete.value) {
@@ -129,7 +125,7 @@ function handleNullPayment() {
             v-if="stripeLoaded && verifiedAmount > 0 && !userExists">
             <StripeElementsVue :stripe-key="stripePk" :instance-options="{}" :elements-options="stripeOptions"
                 ref="elementsComponent">
-                <StripeElementVue type="payment" :options="{}" ref="paymentComponent" @ready="handleStripeRendered"
+                <StripeElementVue type="payment" :options="{}" ref="paymentComponent" @ready="stripeRendered = true"
                     @change="(event: StripeElementChangeEvent) => paymentFormComplete = event.complete" />
             </StripeElementsVue>
             <div id="buttons-row">
@@ -137,7 +133,7 @@ function handleNullPayment() {
                 <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ verifiedAmount }}€</button>
             </div>
         </form>
-        <Loader v-if="!stripeRendered && !userExists"></Loader>
+        <Loader v-if="!stripeRendered && !userExists && verifiedAmount != 0"></Loader>
         <div id="free-event" v-if="verifiedAmount === 0 && !userExists">
             <h3>Aucun paiement à effectuer !</h3>
             <div id="buttons-row">

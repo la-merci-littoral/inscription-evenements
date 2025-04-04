@@ -33,7 +33,6 @@ onBeforeMount(() => {
                 }
                 return (a.order || 0) - (b.order || 0);
             });
-            sessionStorage.setItem('events', JSON.stringify(events.value));
             setTimeout(() => {
                 loadedEvents.value = true
             }, 1000)

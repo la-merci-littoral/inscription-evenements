@@ -229,7 +229,58 @@ async function generateTicket(bookingDetails: IBooking, eventDetails: IEvent) {
     return Buffer.from(pdf)
 }
 
-router.post("/payment/webhook", express.raw({type: 'application/json'}),async (req, res) => {
+async function saveSucceededPayment(pi?: string, pm?: string, id?: string) {
+    const andCond = []
+    if (pi) {
+        andCond.push({"payment.intentId": pi})
+    }
+    if (id) {
+        andCond.push({"booking_id": id})
+    }
+    if (andCond.length === 0) {
+        return 400;
+    }
+    if (pm === undefined) {
+        pm = "none";
+    }
+    
+    const updateResult = await BookingModel.findOneAndUpdate(
+        { $and: andCond },
+        {
+            $set: {
+                "payment.hasPaid": true,
+                "payment.date": new Date(),
+                "payment.method": pm,
+            }
+        },
+        { new: true } // Return the updated document
+    );
+
+    if (!updateResult) {
+        return 404;
+    }
+
+    const eventDetails = await EventModel.findById(updateResult.event_id);
+
+    (updateResult as any).base_url = process.env.BASE_URL;
+    (updateResult as any).eventName = eventDetails!.display_name;
+    mailTransport.sendMail({
+        from: 'La Merci Ne pas Répondre ne-pas-repondre@amis-du-littoral.fr',
+        to: updateResult.email,
+        subject: "La Merci Littoral - Confirmation d'inscription",
+        html: ejs.render(emailTemplates['inscription-confirm'], updateResult),
+        attachments: [
+            {
+                filename: "Ticket " + updateResult.booking_id + " - " + updateResult.surname + ".pdf",
+                content: await generateTicket(updateResult, eventDetails!)
+            }
+        ]
+    });
+
+    return updateResult;
+}
+
+router.post("/payment/webhook", express.raw({type: 'application/json'}), async (req, res) => {
 
     const sig = req.headers['stripe-signature'];
     let event: Stripe.Event;
@@ -243,40 +294,7 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
     event = req.body as Stripe.Event;
     if (event.type == 'payment_intent.succeeded') {
         event = req.body as Stripe.PaymentIntentSucceededEvent
-
-        const updateResult = await BookingModel.findOneAndUpdate(
-            { "payment.intentId": event.data.object.id },
-            {
-                $set: {
-                    "payment.hasPaid": true,
-                    "payment.date": new Date(),
-                    "payment.method": event.data.object.payment_method_types[0],
-                }
-            },
-            { new: true } // Return the updated document
-        );
-
-        if (!updateResult) {
-            res.status(404).send("Not found");
-            return;
-        }
-
-        const eventDetails = await EventModel.findById(updateResult.event_id);
-
-        (updateResult as any).base_url = process.env.BASE_URL;
-        (updateResult as any).eventName = eventDetails!.display_name;
-        mailTransport.sendMail({
-            from: 'La Merci Ne pas Répondre ne-pas-repondre@amis-du-littoral.fr',
-            to: updateResult.email,
-            subject: "La Merci Littoral - Confirmation d'inscription",
-            html: ejs.render(emailTemplates['inscription-confirm'], updateResult),
-            attachments: [
-                {
-                    filename: "Ticket " + updateResult.booking_id + " - " + updateResult.surname + ".pdf",
-                    content: await generateTicket(updateResult, eventDetails!)
-                }
-            ]
-        });
+        await saveSucceededPayment(event.data.object.id, event.data.object.payment_method_types[0]);
     }
 
     res.json({received: true});
@@ -284,14 +302,22 @@ router.post("/payment/webhook", express.raw({type: 'application/json'}),async (r
 
 router.post("/payment/null", async (req, res) => {
     // Only works for free events
-    await BookingModel.findOneAndUpdate({$and: [{"booking_id": req.body.booking_id}, {"payment.price": 0}]}, {"payment.hasPaid" : true, "payment.date": new Date(), "payment.method": 'none'});
-    res.json({received: true});
+    if (req.body.booking_id === undefined) {
+        res.status(400).send("No booking id");
+        return;
+    }
+    if ((await BookingModel.findOne({"booking_id": req.body.booking_id}))!.payment.price == 0){
+        await saveSucceededPayment(undefined, undefined, req.body.booking_id);
+        res.json({received: true});
+    } else {
+        res.status(400).send("Not a free event");
+    }
 })
 
 router.get("/validate", async (req, res) => {
     const paymentIntent = req.query.pi;
     try {
-        const doc = await BookingModel.findOne({"payment.intentId": paymentIntent});
+        const doc = await BookingModel.findOne({$and: [{"payment.intentId": paymentIntent}, {"booking_id": req.query.id}]});
         if (!doc) {
             res.status(404).send("Not found");
         } else {
