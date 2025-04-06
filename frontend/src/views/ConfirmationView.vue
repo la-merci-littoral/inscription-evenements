@@ -8,7 +8,7 @@ const person = usePersonStore();
 const isDownloading = ref(false)
 
 function downloadTicket() {
-    const { jwt: token, booking_id } = JSON.parse(localStorage.getItem('ticket_info')!);
+    const { jwt: token, booking_id } = JSON.parse(decodeURIComponent(document.cookie.replace(/(?:(?:^|.*;\s*)ticket_info\s*\=\s*([^;]*).*$)|^.*$/, "$1")));
     isDownloading.value = true;
     fetch('/api/ticket/'+booking_id, {
         method: 'GET',

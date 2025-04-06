@@ -1,10 +1,9 @@
 import { Schema, model } from "mongoose";
 import { IBooking } from "../types/booking";
-import { customAlphabet, nanoid } from "nanoid";
 
 const BookingSchema: Schema<IBooking> = new Schema({
     _id: { type: String, required: true },
-    booking_id: { type: String, required: true, default: () => customAlphabet("1234567890", 6)()},
+    booking_id: { type: String, required: true},
     member_id: { type: String, required: true },
     name: { type: String, required: true },
     surname: { type: String, required: true },

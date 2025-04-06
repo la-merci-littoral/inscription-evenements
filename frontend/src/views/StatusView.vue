@@ -21,7 +21,8 @@ async function checkAge(birth: string){
     }
 }
 
-function checkMember(member_id: number){
+function checkMember(member_id: string){
+    member_id = member_id.toString(); // Ensure member_id is treated as a string
     fetch('/api/member/' + member_id)
         .then(response => {
             if (response.status === 404){
@@ -41,7 +42,7 @@ function checkMember(member_id: number){
 }
 
 onBeforeMount(() => {
-    if (person.member_id !== 0){
+    if (person.member_id !== ""){
         checkMember(person.member_id);
     }
     if (person.birth !== ''){
@@ -60,7 +61,7 @@ onBeforeMount(() => {
                 <div class="verif-component" v-if="price_category.type === 'member'">
                     <h3>Numéro d'adhésion à l'Association des Amis du Littoral (si vous êtes adhérent)</h3>
                     <div class="component-picker">
-                        <input type="number" v-model="person.member_id" min="0" max="999999" @input="checkMember(person.member_id)" :class="{validated: memberInvalid == false, invalidated: memberInvalid == true}"/>
+                        <input type="number" v-model="person.member_id" min="0" max="999999" @input="checkMember(person.member_id.toString())" :class="{validated: memberInvalid == false, invalidated: memberInvalid == true}"/>
                         <!-- <span v-if="!memberInvalid">Bonjour {{ person.fullName }} !</span> -->
                     </div>
                 </div>

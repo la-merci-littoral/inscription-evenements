@@ -11,8 +11,8 @@ interface Person {
     selectedEvent: Event;
     verifiedCategories: Event['price_categories'];
     bestPriceCategory: Event['price_categories'][0];
-    member_id: number;
-    booking_id: number;
+    member_id: string;
+    booking_id: string;
     pi_secret: string;
 }
 
