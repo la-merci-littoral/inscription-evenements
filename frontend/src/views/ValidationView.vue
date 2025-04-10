@@ -21,7 +21,7 @@ onMounted(() => {
                 setTimeout(async () => {
                     clearInterval(validationPoller);
                     if (response.status === 200) {
-                        localStorage.setItem('ticket_info', JSON.stringify(await response.json() as { jwt: string; booking_id: string; }));
+                        document.cookie = `ticket_info=${encodeURIComponent(JSON.stringify(await response.json() as { jwt: string; booking_id: string; }))}; path=/; secure; samesite=strict`;
                         router.push({ path: '/confirmation' });
                     }
                 }, 1500);

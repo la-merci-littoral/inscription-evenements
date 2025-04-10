@@ -46,7 +46,7 @@ const paymentComponent = ref()
 const paymentFormComplete = ref(false)
 const verifiedAmount = ref(-1) //ref(person.bestPriceCategory.price)
 
-var userExists = ref(false)
+var eventFull = ref(false)
 
 async function sendUserData(){
     fetch("/api/booking", {
@@ -58,13 +58,13 @@ async function sendUserData(){
         })
         .then((response) => {
             if (response.status === 409){
-                userExists.value = true
-                person.$state.booking_id = 0
+                eventFull.value = true
             };
             return response.json();
         })
         .then((data) => {
             setTimeout(() => {
+                console.log(data)
                 clientSecret.value = data.clientSecret;
                 verifiedAmount.value = data.amount;
                 person.$state.pi_secret = clientSecret.value
@@ -123,9 +123,9 @@ function handleNullPayment() {
 
 <template>
     <div id="payment-wrapper">
-        <h2 v-if="!userExists">Paiement</h2>
+        <h2 v-if="!eventFull">Paiement</h2>
         <form @submit.prevent="handlePaymentSubmit" :style="{ display: stripeRendered ? 'flex' : 'none' }"
-            v-if="stripeLoaded && verifiedAmount > 0 && !userExists">
+            v-if="stripeLoaded && verifiedAmount > 0 && !eventFull">
             <StripeElementsVue :stripe-key="stripePk" :instance-options="{}" :elements-options="stripeOptions"
                 ref="elementsComponent">
                 <StripeElementVue type="payment" :options="{}" ref="paymentComponent" @ready="stripeRendered = true"
@@ -136,17 +136,17 @@ function handleNullPayment() {
                 <button type="submit" :class="{ activated: paymentFormComplete }">Payer les {{ verifiedAmount }}€</button>
             </div>
         </form>
-        <Loader v-if="!stripeRendered && !userExists && verifiedAmount != 0"></Loader>
-        <div id="free-event" v-if="verifiedAmount === 0 && !userExists">
+        <Loader v-if="!stripeRendered && !eventFull && verifiedAmount != 0"></Loader>
+        <div id="free-event" v-if="verifiedAmount === 0 && !eventFull">
             <h3>Aucun paiement à effectuer !</h3>
             <div id="buttons-row">
                 <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
                 <button type="submit" class="activated" @click="handleNullPayment()">Continuer</button>
             </div>
         </div>
-        <div id="already-exists" v-if="userExists">
-            <h3>Une adhésion est déjà associée à ce numéro d'inscription<br>Veuillez rafraîchir la page pour résoudre le problème</h3>
-            <RouterLink to="/mes-informations"><button class="retour-button">Retour</button></RouterLink>
+        <div id="already-exists" v-if="eventFull">
+            <h3>Cet évènement est maintenant complet<br>Veuillez en choisir un autre</h3>
+            <RouterLink to="/choix"><button class="retour-button">Retour</button></RouterLink>
         </div>
     </div>
 </template>

@@ -20,6 +20,7 @@ import { text, barcodes, rectangle, line } from '@pdfme/schemas';
 import { generate } from '@pdfme/generator';
 import { IBooking } from './types/booking';
 import { IEvent } from './types/event';
+import { customAlphabet, nanoid } from "nanoid";
 
 const envPath = process.env.NODE_ENV === 'production' ? '../.env.production' : '../.env.development';
 require('dotenv').config({path: envPath});
@@ -119,9 +120,8 @@ router.put("/booking", async (req, res) => {
             { "payment.hasPaid": true }
         ]
     })
-    if (potentialFind !== null) {
-        res.status(409).send("Already paid");
-        return;
+    if (potentialFind !== null || userData.booking_id === '') {
+        userData.booking_id = customAlphabet("1234567890", 6)();
     }
 
     const event = await EventModel.findById(userData.selectedEvent.id);
@@ -140,16 +140,16 @@ router.put("/booking", async (req, res) => {
         let shouldMin: boolean;
         switch (cat.type) {
             case "member":
-                shouldMin = (userData.member_id != 0) && (await MemberModel.findOne({ "member_id": userData.member_id }) !== null);
+                shouldMin = (userData.member_id != "") && !!(await MemberModel.findOne({ "member_id": userData.member_id }));
                 break;
             case "minor":
                 shouldMin = (userData.birth != "") && (new Date(userData.birth).getTime() < new Date().getTime() - 18 * 365 * 24 * 60 * 60 * 1000);
                 break;
             default:
-                shouldMin = false;
+                shouldMin = true;
                 break;
         }
-        if ((shouldMin && cat.price < minPrice) || minPrice === 0) {
+        if (shouldMin && (cat.price < minPrice || minPrice === 0)) {
             minPrice = cat.price;
         }
     }

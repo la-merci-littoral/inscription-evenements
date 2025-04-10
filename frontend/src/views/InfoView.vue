@@ -59,8 +59,8 @@ onMounted(() => {
 
 <template>
   <div id="info-wrapper">
-    <h2 :class="{ onlytitle: person.member_id == 0 }">Informations personnelles</h2>
-    <h4 id="member-data" v-if="person.member_id > 0">Vos données ont été chargées car vous êtes adhérent</h4>
+    <h2 :class="{ onlytitle: person.member_id == '' }">Informations personnelles</h2>
+    <h4 id="member-data" v-if="person.member_id !== ''">Vos données ont été chargées car vous êtes adhérent</h4>
     <div id="info-form">
       <div v-for="field in person.selectedEvent.info_fields">
         <label for="name" v-if="field == 'name'" :key="field">

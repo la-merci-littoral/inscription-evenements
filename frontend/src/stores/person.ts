@@ -13,8 +13,9 @@ export const usePersonStore = defineStore('person', {
     attendants: 1,
     selectedEvent: {} as Event,
     verifiedCategories: [] as Event["price_categories"],
-    member_id: 0,
+    member_id: '',
     pi_secret: '',
+    booking_id: ''
   }),
   getters: {
     fullName: (state) => `${state.name} ${state.surname}`,
