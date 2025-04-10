@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { usePersonStore } from '@/stores/person';
 import { Download } from 'lucide-vue-next';
 import Loader from '@/components/Loader.vue';
+import Mention from '@/components/Mention.vue';
 const person = usePersonStore();
 
 const isDownloading = ref(false)
@@ -53,6 +54,7 @@ function downloadTicket() {
         </p>
         <p id="session-end">Cette session s'est vidée, vous pouvez à présent fermer l'onglet ou la fenêtre.</p>
     </div>
+    <Mention />
 </template>
 
 <style scoped>

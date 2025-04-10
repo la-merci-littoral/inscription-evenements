@@ -76,6 +76,5 @@ import Help from './components/Help.vue';
     justify-content: center;
     align-items: center;
   }
-
   
 </style>

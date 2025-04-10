@@ -3,6 +3,7 @@ import { RouterLink } from 'vue-router'
 import '@fontsource/krona-one';
 import '@fontsource/lexend';
 import { ChevronRight } from 'lucide-vue-next';
+import Mention from '@/components/Mention.vue';
 </script>
 
 <template>
@@ -15,6 +16,7 @@ import { ChevronRight } from 'lucide-vue-next';
       </button>
     </RouterLink>
   </div>
+  <Mention />
 </template>
 
 <style scoped>
