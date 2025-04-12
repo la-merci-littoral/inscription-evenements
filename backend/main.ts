@@ -87,7 +87,10 @@ router.get("/events", async (req,res) => {
         }
     })
     await Promise.all(events.map(async (event) => {
-        event.bookings_left = event.limit - await BookingModel.countDocuments({"event_id": event._id, "payment.hasPaid": true}) as number;
+        event.bookings_left = event.limit - await BookingModel.aggregate([
+            { $match: { "event_id": event._id, "payment.hasPaid": true } },
+            { $group: { _id: null, totalAttendants: { $sum: "$attendants" } } }
+        ]).then(result => result[0]?.totalAttendants || 0);
     }));
     res.send(events)
 })
