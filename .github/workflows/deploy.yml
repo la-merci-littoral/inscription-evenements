@@ -38,6 +38,7 @@ jobs:
           echo "EMAIL_USER=${{ secrets.EMAIL_USER }}" >> .env.production
           echo "EMAIL_PASS=${{ secrets.EMAIL_PASS }}" >> .env.production
           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env.production
+          echo "ADMIN_BOOKING_ID=${{ secrets.ADMIN_BOOKING_ID }}" >> .env.production
 
       - name: Build
         run: NODE_ENV=production npm run build
