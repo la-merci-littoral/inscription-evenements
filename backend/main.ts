@@ -214,7 +214,7 @@ async function generateTicket(bookingDetails: IBooking, eventDetails: IEvent) {
             eventDate: eventDetails!.date_start.toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }),
             eventLocation: eventDetails!.location,
             personName: fullname == " " ? "Non renseigné" : fullname,
-            personCategory: eventDetails!.price_categories.find((cat) => cat.price == bookingDetails.payment.price)!.display,
+            personCategory: bookingDetails.payment.price == 0 ? "Offert" : eventDetails!.price_categories.find((cat) => cat.price == bookingDetails.payment.price)!.display,
             price: String(bookingDetails.payment.price) + " €",
             accompanying: String(bookingDetails.attendants - 1)
         }]
@@ -338,7 +338,10 @@ router.get("/ticket/:booking_id", async (req, res) => {
     }
     const token = authHeader.split(' ')[1];
     try {
-        jwt.verify(token, process.env.JWT_SECRET!);
+        const payload = jwt.verify(token, process.env.JWT_SECRET!);
+        if ((payload as {booking_id: string}).booking_id! !== req.params.booking_id && (payload as {booking_id: string}).booking_id! !== process.env.ADMIN_BOOKING_ID) {
+            throw ''
+        }
     } catch (err) {
         res.status(403).send("Invalid or expired token");
         return;
