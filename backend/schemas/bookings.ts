@@ -18,7 +18,8 @@ const BookingSchema: Schema<IBooking> = new Schema({
         method: { type: String, required: true },
         intentId: { type: String, required: true },
         price: { type: Number, required: true }
-    }
+    },
+    vip: { type: Boolean, required: false, default: false }
 })
 
 const BookingModel = model<IBooking>("booking", BookingSchema, "inscription");

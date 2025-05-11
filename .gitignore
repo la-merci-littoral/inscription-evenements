@@ -37,3 +37,5 @@ mongodb.cfg
 log/
 
 credentials.md
+scripts/loadAdminToken.ps1
+scripts/output.exe

@@ -17,5 +17,6 @@ interface IBooking extends Document {
         method: string;
         intentId: string;
         price: number;
-    }
+    };
+    vip: boolean;
 }
