@@ -14,6 +14,8 @@ const EventSchema: Schema<IEvent> = new Schema({
     }],
     order: { type: Number, required: true },
     limit: { type: Number, required: true },
+    booking_open: { type: Date, required: true },
+    booking_close: { type: Date, required: true },
 });
 
 const EventModel: Model<IEvent> = model("event", EventSchema, "evenement");

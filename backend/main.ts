@@ -85,14 +85,14 @@ router.get("/events", async (req,res) => {
         return {
             ...dbEvent.toObject()
         }
-    })
+    }).filter(event => { return event.booking_open <= new Date() && event.booking_close >= new Date() && event.date_start >= new Date() });
     await Promise.all(events.map(async (event) => {
         event.bookings_left = event.limit - await BookingModel.aggregate([
             { $match: { "event_id": event._id, "payment.hasPaid": true } },
             { $group: { _id: null, totalAttendants: { $sum: "$attendants" } } }
         ]).then(result => result[0]?.totalAttendants || 0);
     }));
-    res.send(events)
+    res.send(events);
 })
 
 router.get("/member/:member_id", async (req, res) => {
