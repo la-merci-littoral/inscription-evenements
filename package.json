@@ -11,7 +11,8 @@
         "dev": "cross-env NODE_ENV=development concurrently \"npm run dev:backend\" \"npm  run dev:frontend\"",
         "build:frontend": "cross-env NODE_ENV=production npm --workspace frontend run build",
         "build:backend": "cross-env NODE_ENV=production npm --workspace backend run build",
-        "build": "cross-env NODE_ENV=production npm run build:frontend && npm run build:backend"
+        "build": "cross-env NODE_ENV=production npm run build:frontend && npm run build:backend",
+        "buildScript": "cd ./scripts && start powershell ./bundler.ps1"
     },
     "devDependencies": {
         "concurrently": "^6.2.1",
