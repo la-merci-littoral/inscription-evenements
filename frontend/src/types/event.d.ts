@@ -13,6 +13,8 @@ interface Event {
     limit: number;
     bookings_left: number;
     info_fields: ('name' | 'surname' | 'email' | 'phone' | 'attendants')[];
+    booking_open: Date;
+    booking_close: Date;
 }
 
 export default Event;

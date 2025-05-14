@@ -12,31 +12,44 @@ const person = usePersonStore();
 const events = ref([] as Event[]);
 const loadedEvents = ref(false)
 
-onBeforeMount(() => {
-    fetch('/api/events')
-        .then(response => response.json())
-        .then(data => {
-            events.value = data.map((event: any) => {
-                (event.price_categories as Event["price_categories"]).sort((a, b) => {
-                    if (a.type === 'default') return 1;
-                    if (b.type === 'default') return -1;
-                    return a.price - b.price;
+const nearlyClosingHrs = import.meta.env.NEARLY_CLOSING_HRS
+
+async function getEvents(){
+    return new Promise<null>((resolve, reject) => {
+        fetch('/api/events')
+            .then(response => response.json())
+            .then(data => {
+                events.value = data.map((event: any) => {
+                    (event.price_categories as Event["price_categories"]).sort((a, b) => {
+                        if (a.type === 'default') return 1;
+                        if (b.type === 'default') return -1;
+                        return a.price - b.price;
+                    });
+                    event.booking_close = new Date(event.booking_close);
+                    event.booking_open = new Date(event.booking_open);
+                    event.date_start = new Date(event.date_start);
+                    return {
+                        ...event,
+                        id: event._id
+                    }
+                }).sort((a: Event, b: Event) => {
+                    const dateComparison = new Date(a.date_start).setHours(0, 0, 0, 0) - new Date(b.date_start).setHours(0, 0, 0, 0);
+                    if (dateComparison !== 0) {
+                        return dateComparison;
+                    }
+                    return (a.order || 0) - (b.order || 0);
                 });
-                return {
-                    ...event,
-                    id: event._id
-                }
-            }).sort((a: Event, b: Event) => {
-                const dateComparison = new Date(a.date_start).setHours(0, 0, 0, 0) - new Date(b.date_start).setHours(0, 0, 0, 0);
-                if (dateComparison !== 0) {
-                    return dateComparison;
-                }
-                return (a.order || 0) - (b.order || 0);
-            });
-            setTimeout(() => {
-                loadedEvents.value = true
-            }, 1000)
-        })
+                resolve(null)
+            })
+    })
+}
+
+onBeforeMount(async () => {
+    await getEvents()
+    setTimeout(() => {
+        loadedEvents.value = true
+    }, 1000)
+    setInterval(getEvents, 5000)
 })
 
 function chooseEvent(eventId: string) {
@@ -59,12 +72,15 @@ function chooseEvent(eventId: string) {
     <div id="choice-wrapper">
         <h2>Choix de l'évènement</h2>
         <div id="events-list" v-if="loadedEvents">
-            <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0" @click="event.bookings_left > 0 ? chooseEvent(event.id) : null" :class="{ 'event-disabled': event.bookings_left == 0 }">
+            <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0"
+                @click="event.bookings_left > 0 ? chooseEvent(event.id) : null"
+                :class="{ 'event-disabled': event.bookings_left == 0 }">
                 <h3>{{ event.display_name }}</h3>
                 <div class="info-section">
                     <div class="info-item">
                         <Calendar :size="24" />
-                        <p>{{ new Date(event.date_start).toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) }}</p>
+                        <p>{{ event.date_start.toLocaleString("fr-FR", { timeZone: 'Europe/Paris', hour:
+                            '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) }}</p>
                     </div>
                     <div class="info-item">
                         <MapPin :size="24" />
@@ -87,7 +103,12 @@ function chooseEvent(eventId: string) {
                 <div class="prices-section" v-else>
                     <p id="free-indicator">Gratuit !</p>
                 </div>
-                <div class="ribbon" v-if="event.bookings_left < 50 && event.bookings_left > 0">Plus que {{ event.bookings_left }} places !</div>
+                <div class="ribbon" v-if="event.bookings_left < event.limit*0.1 && event.bookings_left > 0">
+                    Plus que {{ event.bookings_left }} place{{ event.bookings_left > 1 ? "s" : ""}} !
+                </div>
+                <div class="ribbon" v-else v-if="event.booking_close.getTime() - new Date().getTime() < nearlyClosingHrs*3600*1000">
+                    Fermeture imminente
+                </div>
                 <div class="ribbon" v-if="event.bookings_left == 0">Complet</div>
             </div>
             <div v-else>
@@ -198,7 +219,7 @@ div.event h3 {
   right: calc(-1*var(--f));
   padding-inline: .25em;
   line-height: 1.8;
-  background: #9e3927;
+  background: #c2361d;
   border-bottom: var(--f) solid #0005;
   border-left: var(--r) solid #0000;
   clip-path: 
