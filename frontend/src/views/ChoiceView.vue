@@ -74,7 +74,7 @@ function chooseEvent(eventId: string) {
         <h2>Choix de l'évènement</h2>
         <div id="events-list" v-if="loadedEvents">
             <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0"
-                @click="event.bookings_left > 0 || event.booking_close <= new Date() ? chooseEvent(event.id) : null"
+                @click="(event.bookings_left < 0 || event.booking_close) <= new Date() ? null : chooseEvent(event.id)"
                 :class="{ 'event-disabled': event.bookings_left == 0 || event.booking_close < new Date() }">
                 <h3>{{ event.display_name }}</h3>
                 <div class="info-section">
