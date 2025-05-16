@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
+import MaintenanceView from '@/views/MaintenanceView.vue'
 
 const router = createRouter({
   // history: createWebHistory(process.env.SITE_HOST),
@@ -8,7 +9,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing',
-      component: LandingView,
+      //component: LandingView,
+      component: MaintenanceView
     },
     {
       path: '/choix',
