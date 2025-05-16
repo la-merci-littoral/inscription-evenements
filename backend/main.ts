@@ -81,11 +81,15 @@ async function generatePaymentIntent(amount: number) {
 router.get("/events", async (req,res) => {
     // const dbEvents = await EventModel.find({date_start: {$gte: new Date()}}).sort({date_start: 1});
     const dbEvents = await EventModel.find({});
+
+    const hideFinishedDate = new Date()
+    hideFinishedDate.setTime(hideFinishedDate.getTime() - parseInt(process.env.HAS_CLOSED_HRS!) * 3600 * 1000)
+
     const events = dbEvents.map((dbEvent) => {
         return {
             ...dbEvent.toObject()
         }
-    }).filter(event => { return event.booking_open <= new Date() && event.booking_close >= new Date() && event.date_start >= new Date() });
+    }).filter(event => { return event.booking_open <= new Date() && event.booking_close >= hideFinishedDate && event.date_start >= new Date() });
     await Promise.all(events.map(async (event) => {
         event.bookings_left = event.limit - await BookingModel.aggregate([
             { $match: { "event_id": event._id, "payment.hasPaid": true } },

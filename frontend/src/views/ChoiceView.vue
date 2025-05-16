@@ -13,6 +13,7 @@ const events = ref([] as Event[]);
 const loadedEvents = ref(false)
 
 const nearlyClosingHrs = import.meta.env.NEARLY_CLOSING_HRS
+const hasClosedHrs = import.meta.env.HAS_CLOSED_HRS
 
 async function getEvents(){
     return new Promise<null>((resolve, reject) => {
@@ -73,8 +74,8 @@ function chooseEvent(eventId: string) {
         <h2>Choix de l'évènement</h2>
         <div id="events-list" v-if="loadedEvents">
             <div class="event" v-for="event in events" :key="event.id" v-if="events.length > 0"
-                @click="event.bookings_left > 0 ? chooseEvent(event.id) : null"
-                :class="{ 'event-disabled': event.bookings_left == 0 }">
+                @click="event.bookings_left > 0 || event.booking_close <= new Date() ? chooseEvent(event.id) : null"
+                :class="{ 'event-disabled': event.bookings_left == 0 || event.booking_close < new Date() }">
                 <h3>{{ event.display_name }}</h3>
                 <div class="info-section">
                     <div class="info-item">
@@ -106,8 +107,13 @@ function chooseEvent(eventId: string) {
                 <div class="ribbon" v-if="event.bookings_left < event.limit*0.1 && event.bookings_left > 0">
                     Plus que {{ event.bookings_left }} place{{ event.bookings_left > 1 ? "s" : ""}} !
                 </div>
-                <div class="ribbon" v-else v-if="event.booking_close.getTime() - new Date().getTime() < nearlyClosingHrs*3600*1000">
-                    Fermeture imminente
+                <div class="ribbon" v-else
+                    v-if="event.booking_close.getTime() - new Date().getTime() < nearlyClosingHrs*3600*1000">
+                    Clôture imminente
+                </div>
+                <div class="ribbon" v-else
+                    v-if="event.booking_close < new Date()">
+                    Clôturé
                 </div>
                 <div class="ribbon" v-if="event.bookings_left == 0">Complet</div>
             </div>

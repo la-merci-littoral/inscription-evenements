@@ -41,6 +41,7 @@ export default defineConfig({
   define: {
     'import.meta.env.STRIPE_PK': JSON.stringify(process.env.STRIPE_PK),
     'import.meta.env.BASE_URL': JSON.stringify(process.env.BASE_URL),
-    'import.meta.env.NEARLY_CLOSING_HRS': JSON.stringify(process.env.NEARLY_CLOSING_HRS)
+    'import.meta.env.NEARLY_CLOSING_HRS': JSON.stringify(process.env.NEARLY_CLOSING_HRS),
+    'import.meta.env.HAS_CLOSED_HRS': JSON.stringify(process.env.HAS_CLOSED_HRS)
   }
 })
