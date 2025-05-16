@@ -107,15 +107,14 @@ function chooseEvent(eventId: string) {
                 <div class="ribbon" v-if="event.bookings_left < event.limit*0.1 && event.bookings_left > 0">
                     Plus que {{ event.bookings_left }} place{{ event.bookings_left > 1 ? "s" : ""}} !
                 </div>
-                <div class="ribbon" v-else
-                    v-if="event.booking_close.getTime() - new Date().getTime() < nearlyClosingHrs*3600*1000">
-                    Clôture imminente
-                </div>
-                <div class="ribbon" v-else
-                    v-if="event.booking_close < new Date()">
+                <div class="ribbon" v-if="event.bookings_left == 0">Complet</div>
+                <div class="ribbon" v-else-if="event.booking_close < new Date()">
                     Clôturé
                 </div>
-                <div class="ribbon" v-if="event.bookings_left == 0">Complet</div>
+                <div class="ribbon"
+                    v-else-if="event.booking_close.getTime() - new Date().getTime() < nearlyClosingHrs*3600*1000">
+                    Clôture imminente
+                </div>
             </div>
             <div v-else>
                 <p>Aucun évènement disponible</p>
